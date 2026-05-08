@@ -43,25 +43,32 @@ export default function Home() {
             <a href="login.atmo" className="nav-link">Login</a>
             <a href="admission.atmo" className="nav-cta-btn">Apply for Admission</a>
           </div>
-          {/* Mobile hamburger */}
-          <button
-            className="mobile-menu-btn"
-            onClick={() => {
-              const links = document.querySelector('.navbar-links')
-              links?.classList.toggle('mobile-open')
-            }}
-            aria-label="Toggle navigation menu"
-          >
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
+          <div className="navbar-right">
+            <img
+              src="/InShot_20260507_212731657.jpg"
+              alt="Aroyan Logo"
+              className="navbar-logo"
+            />
+            {/* Mobile hamburger */}
+            <button
+              className="mobile-menu-btn"
+              onClick={() => {
+                const links = document.querySelector('.navbar-links')
+                links?.classList.toggle('mobile-open')
+              }}
+              aria-label="Toggle navigation menu"
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+          </div>
         </nav>
 
         {/* Hero Section */}
         <section className="hero">
           <img
-            src="/InShot_20260507_212731657.png"
+            src="/InShot_20260507_212731657.jpg"
             alt="Aroyan Logo"
             className="aroyan-logo"
           />

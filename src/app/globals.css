@@ -239,6 +239,25 @@ html, body {
   transform: translateY(-1px);
 }
 
+/* Navbar right section with logo */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.navbar-logo {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.navbar-logo:hover {
+  transform: scale(1.08);
+}
+
 /* Mobile hamburger button */
 .mobile-menu-btn {
   display: none;
@@ -509,6 +528,11 @@ html, body {
   /* Navbar mobile */
   .navbar {
     padding: 12px 20px;
+  }
+
+  .navbar-logo {
+    width: 36px;
+    height: 36px;
   }
 
   .mobile-menu-btn {

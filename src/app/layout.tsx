@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   keywords: ["Aroyan", "Muslim School", "Quranic Memorization", "Islamic Education", "Madrasah", "Hifz", "Western Education"],
   authors: [{ name: "Aroyan Muslim School" }],
   icons: {
-    icon: "/InShot_20260507_212731657.png",
+    icon: "/InShot_20260507_212731657.jpg",
   },
   openGraph: {
     title: "Aroyan Muslim School",
