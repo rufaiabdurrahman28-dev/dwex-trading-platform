@@ -35,7 +35,13 @@ export default function Home() {
       <div className="D D1">
         {/* Navigation Bar */}
         <nav className="navbar">
-          <div className="navbar-brand">Aroyan</div>
+          <div className="navbar-brand">
+            <img
+              src="/InShot_20260507_212731657.jpg"
+              alt="Aroyan Logo"
+              className="navbar-logo-brand"
+            />
+          </div>
           <div className="navbar-links">
             <a href="home.atmo" className="nav-link">Home</a>
             <a href="about.atmo" className="nav-link">About</a>
@@ -43,26 +49,19 @@ export default function Home() {
             <a href="login.atmo" className="nav-link">Login</a>
             <a href="admission.atmo" className="nav-cta-btn">Apply for Admission</a>
           </div>
-          <div className="navbar-right">
-            <img
-              src="/InShot_20260507_212731657.jpg"
-              alt="Aroyan Logo"
-              className="navbar-logo"
-            />
-            {/* Mobile hamburger */}
-            <button
-              className="mobile-menu-btn"
-              onClick={() => {
-                const links = document.querySelector('.navbar-links')
-                links?.classList.toggle('mobile-open')
-              }}
-              aria-label="Toggle navigation menu"
-            >
-              <span></span>
-              <span></span>
-              <span></span>
-            </button>
-          </div>
+          {/* Mobile hamburger */}
+          <button
+            className="mobile-menu-btn"
+            onClick={() => {
+              const links = document.querySelector('.navbar-links')
+              links?.classList.toggle('mobile-open')
+            }}
+            aria-label="Toggle navigation menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
         </nav>
 
         {/* Hero Section */}

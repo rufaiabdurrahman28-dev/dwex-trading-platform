@@ -182,10 +182,23 @@ html, body {
 }
 
 .navbar-brand {
-  font-size: 24px;
-  font-weight: 700;
-  color: #2D5F3F;
-  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo-brand {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(45, 95, 63, 0.25);
+  border: 2px solid #2D5F3F;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.navbar-logo-brand:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(45, 95, 63, 0.4);
 }
 
 .navbar-links {
@@ -239,25 +252,6 @@ html, body {
   transform: translateY(-1px);
 }
 
-/* Navbar right section with logo */
-.navbar-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.navbar-logo {
-  width: 44px;
-  height: 44px;
-  object-fit: contain;
-  border-radius: 50%;
-  transition: transform 0.3s ease;
-}
-
-.navbar-logo:hover {
-  transform: scale(1.08);
-}
-
 /* Mobile hamburger button */
 .mobile-menu-btn {
   display: none;
@@ -294,6 +288,9 @@ html, body {
   max-width: 120px;
   height: auto;
   margin-bottom: 16px;
+  border-radius: 50%;
+  box-shadow: 0 3px 12px rgba(45, 95, 63, 0.3);
+  border: 3px solid #2D5F3F;
 }
 
 .hero-headline {
@@ -530,9 +527,10 @@ html, body {
     padding: 12px 20px;
   }
 
-  .navbar-logo {
-    width: 36px;
-    height: 36px;
+  .navbar-logo-brand {
+    width: 40px;
+    height: 40px;
+    border-width: 1.5px;
   }
 
   .mobile-menu-btn {
