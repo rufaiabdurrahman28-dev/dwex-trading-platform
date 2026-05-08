@@ -141,12 +141,13 @@ html, body {
 
 /* === D1 - TOP SECTION (Background graphic + Header + Hero) === */
 .D1 {
-  height: 60vh;
+  height: 100vh;
   min-height: 500px;
   background-image: url('/InShot_20260507_212249625.jpg');
   background-size: cover;
-  background-position: center;
+  background-position: center center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
   background-color: #F8F9F5;
   position: relative;
   display: flex;
@@ -161,7 +162,7 @@ html, body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(248, 249, 245, 0.85);
+  background: rgba(248, 249, 245, 0.78);
   z-index: 1;
 }
 
@@ -187,18 +188,19 @@ html, body {
 }
 
 .navbar-logo-brand {
-  width: 52px;
-  height: 52px;
+  width: 58px;
+  height: 58px;
   object-fit: contain;
   border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(45, 95, 63, 0.25);
-  border: 2px solid #2D5F3F;
+  box-shadow: 0 4px 16px rgba(45, 95, 63, 0.45);
+  border: 3px solid #2D5F3F;
+  filter: contrast(1.15) brightness(1.05);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .navbar-logo-brand:hover {
-  transform: scale(1.08);
-  box-shadow: 0 4px 14px rgba(45, 95, 63, 0.4);
+  transform: scale(1.1);
+  box-shadow: 0 6px 22px rgba(45, 95, 63, 0.6);
 }
 
 .navbar-links {
@@ -285,12 +287,13 @@ html, body {
 }
 
 .aroyan-logo {
-  max-width: 120px;
+  max-width: 140px;
   height: auto;
   margin-bottom: 16px;
   border-radius: 50%;
-  box-shadow: 0 3px 12px rgba(45, 95, 63, 0.3);
-  border: 3px solid #2D5F3F;
+  box-shadow: 0 6px 24px rgba(45, 95, 63, 0.5);
+  border: 4px solid #2D5F3F;
+  filter: contrast(1.15) brightness(1.05);
 }
 
 .hero-headline {
@@ -518,8 +521,9 @@ html, body {
 @media (max-width: 768px) {
   /* D1 adjustments */
   .D1 {
-    height: 80vh;
+    height: 100vh;
     min-height: 600px;
+    background-attachment: scroll;
   }
 
   /* Navbar mobile */
@@ -528,9 +532,9 @@ html, body {
   }
 
   .navbar-logo-brand {
-    width: 40px;
-    height: 40px;
-    border-width: 1.5px;
+    width: 44px;
+    height: 44px;
+    border-width: 2.5px;
   }
 
   .mobile-menu-btn {
@@ -562,7 +566,8 @@ html, body {
   }
 
   .aroyan-logo {
-    max-width: 80px;
+    max-width: 100px;
+    border-width: 3px;
   }
 
   .hero-headline {
