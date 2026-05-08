@@ -476,11 +476,11 @@ html, body {
   transform: scale(1.1);
 }
 
-.social-icon img {
+.social-icon svg {
   width: 28px;
   height: 28px;
-  object-fit: contain;
   border-radius: 6px;
+  display: block;
 }
 
 .footer-contact {
