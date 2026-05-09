@@ -27,7 +27,7 @@ export default function Navbar() {
         <a href="/about" className={`nav-link ${isActive('/about') ? 'nav-link-active' : ''}`}>About</a>
         <a href="/admission" className={`nav-link ${isActive('/admission') ? 'nav-link-active' : ''}`}>Admission</a>
         <a href="/login" className={`nav-link ${isActive('/login') ? 'nav-link-active' : ''}`}>Login</a>
-        <a href="/admission" className="nav-cta-btn">Apply for Admission</a>
+        <a href="/apply" className="nav-cta-btn">Apply for Admission</a>
       </div>
       {/* Mobile hamburger */}
       <button

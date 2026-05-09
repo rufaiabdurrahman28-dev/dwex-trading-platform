@@ -3,31 +3,18 @@
 ---
 Task ID: 1
 Agent: Main Agent
-Task: Build Admission page with 3 animated banners, admin panel, and application forms
+Task: Restructure Admission and Apply pages per user amendment
 
 Work Log:
-- Read existing project files (page.tsx, globals.css, layout.tsx, Navbar.tsx, Footer.tsx, admission/page.tsx)
-- Replaced the entire Admission page content with new banner-based system
-- Created 3 animated admission banners (Primary School, Junior Secondary, Senior Secondary)
-- Each banner has: level icon, title, description, admin-posted content area, and Apply button with animated hand
-- Created level-specific application forms at /admission/apply/[level] (primary, junior, senior)
-- Each form has: Child's Information, Parent/Guardian Information, Additional Information sections
-- Added login notice on application form (only logged-in users can submit)
-- Added "Submit (Test Mode - No Login Required)" button for testing without backend
-- Built password-protected Admin panel (password: aroyan2026)
-- Admin can: upload images, upload videos, add text content for each banner
-- Admin can delete existing content with × buttons
-- Admin text editing uses a modal overlay
-- Apply button shows confirmation modal before redirecting to form
-- Application submissions saved to localStorage for admin review simulation
-- Success page shown after form submission
-- Added comprehensive CSS for all new components with responsive design
-- Build compiles successfully with all routes working
+- Created formal Admission page at `/admission` with official content: Welcome overview, Admission Requirements (Full-Time & Weekend Madrasah), How to Apply (4 steps), Programs & Tuition table, Key Admission Dates, and CTA to Apply
+- Created `/apply` page with 3 animated banners (Primary, Junior Secondary, Senior Secondary) + admin panel for posting content
+- Created `/apply/[level]` application form page — fully accessible WITHOUT any sign-up or login requirement
+- Updated Navbar: "Admission" link → `/admission`, "Apply for Admission" CTA button → `/apply`
+- Removed old `/admission/apply/[level]` route
+- Verified all routes return HTTP 200
 
 Stage Summary:
-- Admission page (/admission) - 3 banners with animations, admin panel, apply modals
-- Application forms (/admission/apply/primary, /admission/apply/junior, /admission/apply/senior)
-- Admin password: aroyan2026
-- All banner content persists in localStorage
-- Application submissions stored in localStorage (key: aroyan_applications)
-- Build verified: all 8 routes compile correctly
+- `/admission` = Formal/official admission info (requirements, policies, programs, dates)
+- `/apply` = 3 banners with Apply buttons + admin panel
+- `/apply/[level]` = Application form — no login/signup required
+- All navigation links properly updated

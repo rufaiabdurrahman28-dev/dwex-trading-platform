@@ -98,7 +98,7 @@ export default function ApplyFormPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Save to localStorage for admin review simulation
+    // Save to localStorage for admin review
     const applications = JSON.parse(localStorage.getItem('aroyan_applications') || '[]')
     applications.push({
       id: Date.now(),
@@ -134,7 +134,7 @@ export default function ApplyFormPage() {
               Our admissions team will review your application and contact you shortly.
             </p>
             <div className="apply-success-actions">
-              <a href="/admission" className="cta-btn cta-btn-filled">Back to Admission</a>
+              <a href="/apply" className="cta-btn cta-btn-filled">Back to Apply</a>
               <a href="/" className="cta-btn cta-btn-outline">Go Home</a>
             </div>
           </div>
@@ -151,13 +151,29 @@ export default function ApplyFormPage() {
         <Navbar />
         <section className="page-hero">
           <h1 className="page-hero-title">{config.title} Application</h1>
-          <p className="page-hero-subtitle">{config.description}</p>
+          <p className="page-hero-subtitle">{config.description} &mdash; No sign-up required</p>
         </section>
       </div>
 
       {/* ==================== D2 - Application Form ==================== */}
       <div className="D D2 D2-auto">
         <section className="apply-form-section">
+
+          {/* No-signup notice */}
+          <div className="apply-login-notice apply-animate">
+            <div className="notice-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#C9A961" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v4" />
+                <path d="M12 16h.01" />
+              </svg>
+            </div>
+            <p className="notice-text">
+              <strong>No account needed!</strong> Simply fill out the form below and submit your application.
+              Our admissions team will review it and get back to you.
+            </p>
+          </div>
+
           <form className="apply-form apply-animate" onSubmit={handleSubmit}>
             {/* Child's Information */}
             <div className="apply-form-section-block">
@@ -366,6 +382,7 @@ export default function ApplyFormPage() {
 
             {/* Submit — No sign-up required! */}
             <div className="apply-form-submit">
+              <p className="apply-submit-notice">No account or sign-up needed to apply</p>
               <button
                 type="submit"
                 className="form-submit-btn apply-submit-btn"
