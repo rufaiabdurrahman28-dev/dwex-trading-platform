@@ -218,9 +218,10 @@ export default function AdmissionPage() {
         </section>
       </div>
 
-      {/* ==================== D2 - Admission Banners ==================== */}
+      {/* ==================== D2 - Admission Banners + Formal Content ==================== */}
       <div className="D D2 D2-auto">
         <section className="admission-section">
+
           {/* ── 3 Banners ────────────────────────────────── */}
           <div className="admission-banners-grid">
             {banners.map((banner, idx) => (
@@ -299,7 +300,6 @@ export default function AdmissionPage() {
                       className="admin-post-icon"
                       onClick={() => {
                         openEditBanner(banner)
-                        // trigger file input for image
                         setTimeout(() => {
                           document.getElementById(`img-upload-${banner.id}`)?.click()
                         }, 100)
@@ -391,7 +391,6 @@ export default function AdmissionPage() {
                     onClick={() => setShowApplyModal(banner.id)}
                   >
                     Apply
-                    {/* Animated pointing hand */}
                     <span className="apply-hand">
                       <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M8 20c0 0 2-2 6-2s6 2 6 2" stroke="#C9A961" strokeWidth="2" strokeLinecap="round"/>
@@ -407,6 +406,125 @@ export default function AdmissionPage() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* ── How to Apply ────────────────────────────── */}
+          <div className="admission-block admission-animate">
+            <h2 className="section-heading">How to Apply</h2>
+            <p className="section-intro">
+              Follow these simple steps to enroll your child at Aroyan Muslim School. We welcome
+              students of all backgrounds who are eager to learn and grow in an Islamic environment.
+            </p>
+            <div className="steps-grid">
+              <div className="step-card">
+                <div className="step-number">1</div>
+                <h3 className="step-title">Choose a Level</h3>
+                <p className="step-desc">
+                  Select from Primary School, Junior Secondary, or Senior Secondary above and click
+                  the Apply button on the banner to begin your application.
+                </p>
+              </div>
+              <div className="step-card">
+                <div className="step-number">2</div>
+                <h3 className="step-title">Fill Application Form</h3>
+                <p className="step-desc">
+                  Complete the application form with your child&apos;s details, including
+                  personal information, previous school records, and preferred program of study.
+                </p>
+              </div>
+              <div className="step-card">
+                <div className="step-number">3</div>
+                <h3 className="step-title">Entrance Assessment</h3>
+                <p className="step-desc">
+                  Your child will take a brief assessment to determine their current academic level
+                  and Quranic proficiency. This helps us place them in the right class and program.
+                </p>
+              </div>
+              <div className="step-card">
+                <div className="step-number">4</div>
+                <h3 className="step-title">Admission Offer</h3>
+                <p className="step-desc">
+                  Successful applicants will receive an admission offer letter with details about
+                  tuition fees, resumption date, and orientation schedule for new students.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Admission Requirements ──────────────────── */}
+          <div className="admission-block admission-animate">
+            <h2 className="section-heading">Admission Requirements</h2>
+            <div className="requirements-grid">
+              <div className="requirement-card">
+                <h3 className="requirement-title">Full-Time Program</h3>
+                <ul className="requirement-list">
+                  <li>Ages 6-15 for primary/secondary enrollment</li>
+                  <li>Previous school transcripts or records</li>
+                  <li>Birth certificate and passport photographs</li>
+                  <li>Parent or guardian consent form</li>
+                  <li>Entrance assessment in English and Mathematics</li>
+                  <li>Basic Quran recitation ability (preferred)</li>
+                </ul>
+              </div>
+              <div className="requirement-card">
+                <h3 className="requirement-title">Weekend Madrasah</h3>
+                <ul className="requirement-list">
+                  <li>Open to all ages (children and adults)</li>
+                  <li>No previous Islamic education required</li>
+                  <li>Birth certificate for minors</li>
+                  <li>Parent or guardian consent form for under 18</li>
+                  <li>Commitment to attend Saturday and Sunday sessions</li>
+                  <li>Willingness to learn Quran recitation and Tajweed</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Programs & Tuition ─────────────────────── */}
+          <div className="admission-block admission-animate">
+            <h2 className="section-heading">Programs &amp; Tuition</h2>
+            <div className="programs-table-wrapper">
+              <table className="programs-table">
+                <thead>
+                  <tr>
+                    <th>Program</th>
+                    <th>Duration</th>
+                    <th>Schedule</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="program-name">Hifz Program</td>
+                    <td>3-5 years</td>
+                    <td>Mon - Fri</td>
+                    <td>Complete Quran memorization with Tajweed</td>
+                  </tr>
+                  <tr>
+                    <td className="program-name">Full-Time Academic</td>
+                    <td>Per term</td>
+                    <td>Mon - Fri</td>
+                    <td>Western curriculum + Islamic studies</td>
+                  </tr>
+                  <tr>
+                    <td className="program-name">Saturday Madrasah</td>
+                    <td>Per term</td>
+                    <td>Saturdays</td>
+                    <td>Quran recitation, Tajweed, and Islamic studies</td>
+                  </tr>
+                  <tr>
+                    <td className="program-name">Sunday Madrasah</td>
+                    <td>Per term</td>
+                    <td>Sundays</td>
+                    <td>Arabic language, Fiqh, and Seerah</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="fees-note">
+              For detailed tuition fees and payment plans, please contact our admissions office
+              at info@aroyanschool.edu or call +234-XXX-XXX-XXXX.
+            </p>
           </div>
 
           {/* ── Admin Panel Toggle ──────────────────────── */}
@@ -522,7 +640,7 @@ export default function AdmissionPage() {
             <p className="apply-modal-desc">
               You are about to apply for the{' '}
               <strong>{banners.find((b) => b.id === showApplyModal)?.title}</strong> program.
-              Only logged-in approved users can submit the application form.
+              Click Continue to fill the application form. No sign-up required!
             </p>
             <div className="apply-modal-buttons">
               <a

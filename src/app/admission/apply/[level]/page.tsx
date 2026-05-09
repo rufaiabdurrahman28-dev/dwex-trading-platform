@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Navbar from '@/components/shared/Navbar'
 import Footer from '@/components/shared/Footer'
 
@@ -43,11 +43,9 @@ const LEVEL_CONFIG: Record<string, { title: string; description: string; ageRang
 
 export default function ApplyFormPage() {
   const params = useParams()
-  const router = useRouter()
   const level = params.level as string
   const config = LEVEL_CONFIG[level] || LEVEL_CONFIG.primary
 
-  const [isLoggedIn] = useState(false) // UI-only: no backend yet
   const [formSubmitted, setFormSubmitted] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     childFirstName: '',
@@ -100,7 +98,7 @@ export default function ApplyFormPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // UI-only: save to localStorage for admin review simulation
+    // Save to localStorage for admin review simulation
     const applications = JSON.parse(localStorage.getItem('aroyan_applications') || '[]')
     applications.push({
       id: Date.now(),
@@ -160,22 +158,6 @@ export default function ApplyFormPage() {
       {/* ==================== D2 - Application Form ==================== */}
       <div className="D D2 D2-auto">
         <section className="apply-form-section">
-          {!isLoggedIn && (
-            <div className="apply-login-notice apply-animate">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#C9A961" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="notice-icon">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              <p className="notice-text">
-                You are not currently logged in. You can preview and fill the form, but only
-                logged-in approved users can submit.{' '}
-                <a href="/login" className="form-link-bold">Login here</a> or{' '}
-                <a href="/signup" className="form-link-bold">Sign up</a>.
-              </p>
-            </div>
-          )}
-
           <form className="apply-form apply-animate" onSubmit={handleSubmit}>
             {/* Child's Information */}
             <div className="apply-form-section-block">
@@ -382,39 +364,13 @@ export default function ApplyFormPage() {
               </div>
             </div>
 
-            {/* Submit */}
+            {/* Submit — No sign-up required! */}
             <div className="apply-form-submit">
-              {!isLoggedIn && (
-                <p className="apply-submit-notice">
-                  You must be logged in and approved to submit this form.
-                </p>
-              )}
               <button
                 type="submit"
-                className={`form-submit-btn apply-submit-btn ${!isLoggedIn ? 'btn-disabled' : ''}`}
-                disabled={!isLoggedIn}
+                className="form-submit-btn apply-submit-btn"
               >
                 Submit Application
-              </button>
-              {/** For testing: allow submit even without login **/}
-              <button
-                type="button"
-                className="form-submit-btn apply-submit-test-btn"
-                onClick={() => {
-                  // Quick test submit bypass
-                  const applications = JSON.parse(localStorage.getItem('aroyan_applications') || '[]')
-                  applications.push({
-                    id: Date.now(),
-                    level,
-                    ...formData,
-                    status: 'pending',
-                    submittedAt: new Date().toISOString(),
-                  })
-                  localStorage.setItem('aroyan_applications', JSON.stringify(applications))
-                  setFormSubmitted(true)
-                }}
-              >
-                Submit (Test Mode - No Login Required)
               </button>
             </div>
           </form>
