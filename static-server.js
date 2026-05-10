@@ -1,9 +1,20 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const { execSync, spawn } = require('child_process');
 
 const OUT_DIR = path.join(__dirname, 'out');
 const PORT = 3000;
+
+// If out directory doesn't exist, build first
+if (!fs.existsSync(OUT_DIR) || !fs.existsSync(path.join(OUT_DIR, 'index.html'))) {
+  console.log('Static files not found, building...');
+  try {
+    execSync('npx next build', { cwd: __dirname, stdio: 'inherit' });
+  } catch (e) {
+    console.error('Build failed:', e.message);
+  }
+}
 
 const MIME_TYPES = {
   '.html': 'text/html',
@@ -25,23 +36,19 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
-  let urlPath = req.url.split('?')[0]; // Remove query string
+  let urlPath = req.url.split('?')[0];
 
-  // Handle Next.js static export URL structure
   let filePath = path.join(OUT_DIR, urlPath);
 
-  // If the path is a directory, try index.html
   if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
     filePath = path.join(filePath, 'index.html');
   }
 
-  // If file doesn't exist, try with .html extension
   if (!fs.existsSync(filePath)) {
     const htmlPath = filePath + '.html';
     if (fs.existsSync(htmlPath)) {
       filePath = htmlPath;
     } else {
-      // 404 - serve the 404 page
       const notFoundPath = path.join(OUT_DIR, '404.html');
       if (fs.existsSync(notFoundPath)) {
         filePath = notFoundPath;
@@ -55,21 +62,31 @@ const server = http.createServer((req, res) => {
 
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-
-  // Set cache headers for static assets
   const maxAge = ext === '.html' ? 0 : 86400;
+
   res.setHeader('Cache-Control', `public, max-age=${maxAge}`);
   res.setHeader('Content-Type', contentType);
 
-  const fileStream = fs.createReadStream(filePath);
-  fileStream.on('error', () => {
+  try {
+    const data = fs.readFileSync(filePath);
+    res.writeHead(200);
+    res.end(data);
+  } catch (err) {
     res.writeHead(500, { 'Content-Type': 'text/html' });
     res.end('<h1>Server Error</h1>');
-  });
-  fileStream.pipe(res);
+  }
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Static server running at http://localhost:${PORT}`);
-  console.log(`Serving files from: ${OUT_DIR}`);
+  console.log(`Aroyan static server running at http://localhost:${PORT}`);
 });
+
+// Self-ping keep-alive
+setInterval(() => {
+  http.get(`http://localhost:${PORT}`, (res) => {
+    res.resume();
+  }).on('error', () => {
+    // Server is down, try to restart
+    console.log('Self-ping failed, server may be down');
+  });
+}, 5000);
