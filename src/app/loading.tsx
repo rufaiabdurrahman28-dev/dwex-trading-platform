@@ -14,36 +14,42 @@ export default function Loading() {
       zIndex: 9999,
       fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
     }}>
-      <div style={{
-        width: 64,
-        height: 64,
-        borderRadius: '50%',
-        border: '3px solid #2D5F3F',
-        boxShadow: '0 4px 16px rgba(45, 95, 63, 0.4)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#FFFFFF',
-        marginBottom: 16,
-        animation: 'pulse 1.5s ease-in-out infinite',
-      }}>
-        <span style={{ color: '#2D5F3F', fontSize: 24, fontWeight: 700 }}>A</span>
-      </div>
+      <img
+        src="/InShot_20260507_212731657.jpg"
+        alt="Aroyan Logo"
+        style={{
+          width: 72,
+          height: 72,
+          borderRadius: '50%',
+          border: '3px solid #2D5F3F',
+          boxShadow: '0 4px 16px rgba(45, 95, 63, 0.4)',
+          objectFit: 'cover',
+          marginBottom: 16,
+          animation: 'logoPulse 1.5s ease-in-out infinite',
+        }}
+      />
       <h2 style={{
         color: '#2D5F3F',
         fontSize: 20,
         fontWeight: 700,
         margin: 0,
       }}>Aroyan Muslim School</h2>
-      <p style={{
-        color: '#C9A961',
-        fontSize: 14,
-        margin: '6px 0 0',
-      }}>Loading...</p>
+      <div style={{
+        marginTop: 14,
+        width: 40,
+        height: 40,
+        border: '3px solid rgba(45, 95, 63, 0.15)',
+        borderTopColor: '#2D5F3F',
+        borderRadius: '50%',
+        animation: 'spin 0.8s linear infinite',
+      }} />
       <style>{`
-        @keyframes pulse {
+        @keyframes logoPulse {
           0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.08); }
+          50% { transform: scale(1.06); }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
         }
       `}</style>
     </div>
