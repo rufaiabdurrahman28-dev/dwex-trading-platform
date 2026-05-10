@@ -2,97 +2,74 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
+const OUT_DIR = path.join(__dirname, 'out');
 const PORT = 3000;
-const BASE_DIR = __dirname;
 
 const MIME_TYPES = {
-  '.html': 'text/html; charset=utf-8',
+  '.html': 'text/html',
   '.css': 'text/css',
   '.js': 'application/javascript',
   '.json': 'application/json',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
   '.gif': 'image/gif',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
   '.ttf': 'font/ttf',
+  '.eot': 'application/vnd.ms-fontobject',
+  '.webp': 'image/webp',
   '.map': 'application/json',
 };
 
-function getMimeType(filePath) {
-  const ext = path.extname(filePath).toLowerCase();
-  return MIME_TYPES[ext] || 'application/octet-stream';
-}
-
-function serveFile(filePath, res) {
-  const mimeType = getMimeType(filePath);
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      res.writeHead(500);
-      res.end('Server Error');
-      return;
-    }
-    res.writeHead(200, { 'Content-Type': mimeType });
-    res.end(data);
-  });
-}
-
 const server = http.createServer((req, res) => {
-  let urlPath = req.url.split('?')[0];
-  console.log(`[${new Date().toISOString()}] ${req.method} ${urlPath}`);
-  
-  // Handle _next/static files
-  if (urlPath.startsWith('/_next/')) {
-    const filePath = path.join(BASE_DIR, urlPath);
-    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-      serveFile(filePath, res);
-      return;
-    }
+  let urlPath = req.url.split('?')[0]; // Remove query string
+
+  // Handle Next.js static export URL structure
+  let filePath = path.join(OUT_DIR, urlPath);
+
+  // If the path is a directory, try index.html
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+    filePath = path.join(filePath, 'index.html');
   }
-  
-  // Handle public files (images, etc)
-  const publicPath = path.join(BASE_DIR, 'public', urlPath);
-  if (fs.existsSync(publicPath) && fs.statSync(publicPath).isFile()) {
-    serveFile(publicPath, res);
-    return;
-  }
-  
-  // Route mapping for HTML pages
-  const routeMap = {
-    '/': '.next/server/app/index.html',
-    '/about': '.next/server/app/about.html',
-    '/admission': '.next/server/app/admission.html',
-    '/login': '.next/server/app/login.html',
-    '/signup': '.next/server/app/signup.html',
-  };
-  
-  if (routeMap[urlPath]) {
-    const htmlPath = path.join(BASE_DIR, routeMap[urlPath]);
+
+  // If file doesn't exist, try with .html extension
+  if (!fs.existsSync(filePath)) {
+    const htmlPath = filePath + '.html';
     if (fs.existsSync(htmlPath)) {
-      serveFile(htmlPath, res);
-      return;
+      filePath = htmlPath;
+    } else {
+      // 404 - serve the 404 page
+      const notFoundPath = path.join(OUT_DIR, '404.html');
+      if (fs.existsSync(notFoundPath)) {
+        filePath = notFoundPath;
+      } else {
+        res.writeHead(404, { 'Content-Type': 'text/html' });
+        res.end('<h1>Not Found</h1>');
+        return;
+      }
     }
   }
-  
-  // Dynamic routes - redirect to admission page for now (needs client-side JS)
-  const applyMatch = urlPath.match(/^\/admission\/apply\/(primary|junior|senior)$/);
-  if (applyMatch) {
-    // Read the admission.html and modify it to show the apply form
-    const htmlPath = path.join(BASE_DIR, '.next/server/app/admission.html');
-    if (fs.existsSync(htmlPath)) {
-      serveFile(htmlPath, res);
-      return;
-    }
-  }
-  
-  res.writeHead(404, { 'Content-Type': 'text/html' });
-  res.end('<h1>404 - Page Not Found</h1>');
+
+  const ext = path.extname(filePath).toLowerCase();
+  const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+
+  // Set cache headers for static assets
+  const maxAge = ext === '.html' ? 0 : 86400;
+  res.setHeader('Cache-Control', `public, max-age=${maxAge}`);
+  res.setHeader('Content-Type', contentType);
+
+  const fileStream = fs.createReadStream(filePath);
+  fileStream.on('error', () => {
+    res.writeHead(500, { 'Content-Type': 'text/html' });
+    res.end('<h1>Server Error</h1>');
+  });
+  fileStream.pipe(res);
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Static server running on http://0.0.0.0:${PORT}`);
+  console.log(`Static server running at http://localhost:${PORT}`);
+  console.log(`Serving files from: ${OUT_DIR}`);
 });
-
-setInterval(() => {}, 60000);
