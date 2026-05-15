@@ -2,16 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Aroyan Muslim School - Quranic Memorization & Western Education",
-  description: "Aroyan Muslim School is dedicated to Quranic memorization and Islamic disciplines alongside Western education. Join our Saturday and Sunday Madrasah programs.",
-  keywords: ["Aroyan", "Muslim School", "Quranic Memorization", "Islamic Education", "Madrasah", "Hifz", "Western Education"],
-  authors: [{ name: "Aroyan Muslim School" }],
-  icons: {
-    icon: "/InShot_20260507_212731657.jpg",
-  },
+  title: "9mach Trade — Trade Smart, Trade Global",
+  description: "The most powerful trading platform for Forex, Stocks, Crypto & more. Deposit in Naira ₦, trade globally. 1,500+ assets, live charts, Nigerian wallet.",
+  keywords: ["9mach Trade", "Forex", "Stocks", "Crypto", "Trading", "Nigeria", "Naira"],
+  authors: [{ name: "9mach Trade" }],
   openGraph: {
-    title: "Aroyan Muslim School",
-    description: "Quranic Memorization & Western Education Combined",
+    title: "9mach Trade — Trade Smart, Trade Global",
+    description: "1,500+ assets. Live charts. Nigerian wallet. Start trading today.",
     type: "website",
   },
 };
@@ -22,11 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="/InShot_20260507_212731657.jpg" />
-      </head>
-      <body className="antialiased">
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body className="antialiased bg-[#0a0a0f] text-white">
         {children}
       </body>
     </html>

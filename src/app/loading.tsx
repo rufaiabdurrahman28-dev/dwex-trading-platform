@@ -6,7 +6,7 @@ export default function Loading() {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: '#F8F9F5',
+      backgroundColor: '#0a0a0f',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -14,32 +14,37 @@ export default function Loading() {
       zIndex: 9999,
       fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
     }}>
-      <img
-        src="/InShot_20260507_212731657.jpg"
-        alt="Aroyan Logo"
-        style={{
-          width: 72,
-          height: 72,
-          borderRadius: '50%',
-          border: '3px solid #2D5F3F',
-          boxShadow: '0 4px 16px rgba(45, 95, 63, 0.4)',
-          objectFit: 'cover',
-          marginBottom: 16,
-          animation: 'logoPulse 1.5s ease-in-out infinite',
-        }}
-      />
+      <div style={{
+        width: 56,
+        height: 56,
+        borderRadius: 12,
+        background: 'linear-gradient(to bottom right, #34d399, #059669)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: 700,
+        fontSize: 20,
+        color: '#000',
+        marginBottom: 16,
+        animation: 'logoPulse 1.5s ease-in-out infinite',
+      }}>9M</div>
       <h2 style={{
-        color: '#2D5F3F',
+        color: '#34d399',
         fontSize: 20,
         fontWeight: 700,
         margin: 0,
-      }}>Aroyan Muslim School</h2>
+      }}>9mach Trade</h2>
+      <p style={{
+        color: '#6b7280',
+        fontSize: 13,
+        marginTop: 4,
+      }}>Loading markets...</p>
       <div style={{
         marginTop: 14,
         width: 40,
         height: 40,
-        border: '3px solid rgba(45, 95, 63, 0.15)',
-        borderTopColor: '#2D5F3F',
+        border: '3px solid rgba(52, 211, 153, 0.15)',
+        borderTopColor: '#34d399',
         borderRadius: '50%',
         animation: 'spin 0.8s linear infinite',
       }} />

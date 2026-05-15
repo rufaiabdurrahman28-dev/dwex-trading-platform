@@ -1,234 +1,63 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/lib/auth-context'
-import type { Role, Section } from '@/lib/types'
-import Navbar from '@/components/shared/Navbar'
-import Footer from '@/components/shared/Footer'
+import Link from 'next/link'
 
 export default function SignupPage() {
-  const router = useRouter()
-  const { signUp } = useAuth()
-  const [fullName, setFullName] = useState('')
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [role, setRole] = useState<Role | ''>('')
-  const [section, setSection] = useState<Section>('primary')
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-    setSuccess('')
-
-    if (!role) {
-      setError('Please select your role')
-      return
-    }
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
-      return
-    }
-
     setLoading(true)
-
-    try {
-      const { error: signUpError } = await signUp(email, password, fullName, role as Role, section)
-
-      if (signUpError) {
-        setError(signUpError)
-        setLoading(false)
-        return
-      }
-
-      setSuccess('Account created! Please check your email to confirm your account, then login.')
+    setTimeout(() => {
       setLoading(false)
-    } catch (err: any) {
-      setError(err.message || 'Signup failed. Please try again.')
-      setLoading(false)
-    }
+      window.location.href = '/dashboard'
+    }, 2000)
   }
 
   return (
-    <>
-      {/* ==================== D1 - Header ==================== */}
-      <div className="D D1 D1-short">
-        <Navbar />
-      </div>
+    <div className="min-h-screen bg-[#0a0a0f] text-white flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center font-bold text-lg text-black mx-auto mb-4">9M</div>
+          <h1 className="text-2xl font-bold">Create Account</h1>
+          <p className="text-gray-500 mt-1">Start trading on 9mach Trade today</p>
+        </div>
 
-      {/* ==================== D2 - Sign Up Form ==================== */}
-      <div className="D D2 D2-auto D2-center">
-        <section className="auth-section">
-          <div className="auth-card auth-card-wide">
-            <div className="auth-card-header">
-              <img
-                src="/school-logo.png"
-                alt="Aroyan Muslim School"
-                className="auth-logo"
-              />
-              <h1 className="auth-title">Create Account</h1>
-              <p className="auth-subtitle">Join Aroyan Muslim School today</p>
-            </div>
-
-            {error && (
-              <div style={{
-                padding: '12px 16px',
-                borderRadius: '8px',
-                marginBottom: '20px',
-                fontSize: '14px',
-                fontWeight: 500,
-                background: 'rgba(220, 53, 69, 0.08)',
-                border: '1px solid rgba(220, 53, 69, 0.25)',
-                color: '#dc3545',
-              }}>
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div style={{
-                padding: '12px 16px',
-                borderRadius: '8px',
-                marginBottom: '20px',
-                fontSize: '14px',
-                fontWeight: 500,
-                background: 'rgba(45, 95, 63, 0.08)',
-                border: '1px solid rgba(45, 95, 63, 0.25)',
-                color: '#2D5F3F',
-              }}>
-                {success}
-              </div>
-            )}
-
-            <form className="auth-form" onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label htmlFor="fullName" className="form-label">Full Name</label>
-                <input
-                  type="text"
-                  id="fullName"
-                  className="form-input"
-                  placeholder="Enter your full name"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="signupEmail" className="form-label">Email Address</label>
-                <input
-                  type="email"
-                  id="signupEmail"
-                  className="form-input"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="role" className="form-label">I am a...</label>
-                <select
-                  id="role"
-                  className="form-input form-select"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as Role | '')}
-                  required
-                  disabled={loading}
-                >
-                  <option value="">Select your role</option>
-                  <option value="student">Student</option>
-                  <option value="parent">Parent / Guardian</option>
-                  <option value="teacher">Teacher</option>
-                  <option value="manager" disabled>Management (Contact school)</option>
-                </select>
-                {role === 'manager' && (
-                  <p style={{ fontSize: '13px', color: '#C9A961', margin: '6px 0 0', fontWeight: 500 }}>
-                    Management accounts are created by the admin only. Contact the school if you need a management account.
-                  </p>
-                )}
-              </div>
-
-              {role && role !== 'manager' && (
-                <div className="form-group">
-                  <label htmlFor="section" className="form-label">Section</label>
-                  <select
-                    id="section"
-                    className="form-input form-select"
-                    value={section}
-                    onChange={(e) => setSection(e.target.value as Section)}
-                    required
-                    disabled={loading}
-                  >
-                    <option value="nursery">Nursery</option>
-                    <option value="primary">Primary</option>
-                    <option value="jss">JSS</option>
-                    <option value="sss">SSS</option>
-                  </select>
-                </div>
-              )}
-
-              <div className="form-row-2col">
-                <div className="form-group">
-                  <label htmlFor="signupPassword" className="form-label">Password</label>
-                  <input
-                    type="password"
-                    id="signupPassword"
-                    className="form-input"
-                    placeholder="Create a password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    className="form-input"
-                    placeholder="Confirm password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="form-submit-btn"
-                disabled={loading || !fullName || !email || !password || !role}
-                style={{ opacity: loading ? 0.7 : 1 }}
-              >
-                {loading ? 'Creating Account...' : 'Create Account'}
-              </button>
-            </form>
-
-            <div className="auth-footer">
-              <p>Already have an account? <a href="/login" className="form-link-bold">Login</a></p>
-            </div>
+        <form onSubmit={handleSignup} className="bg-[#1a1a2e] rounded-2xl p-6 border border-white/5 space-y-4">
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Full Name</label>
+            <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your full name" required className="w-full bg-[#0d0d15] border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-emerald-500/50" />
           </div>
-        </section>
-      </div>
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Email</label>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required className="w-full bg-[#0d0d15] border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-emerald-500/50" />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Phone Number</label>
+            <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+234 800 000 0000" required className="w-full bg-[#0d0d15] border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-emerald-500/50" />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">Password</label>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min 8 characters" required className="w-full bg-[#0d0d15] border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-emerald-500/50" />
+          </div>
+          <div className="flex items-start gap-2">
+            <input type="checkbox" required className="mt-1" />
+            <p className="text-xs text-gray-500">I agree to the Terms of Service and acknowledge that trading involves risk.</p>
+          </div>
+          <button type="submit" disabled={loading} className="w-full bg-emerald-500 text-black font-bold py-4 rounded-xl hover:bg-emerald-600 transition disabled:opacity-50">
+            {loading ? 'Creating Account...' : 'Create Free Account'}
+          </button>
+        </form>
 
-      {/* ==================== D3 - Footer ==================== */}
-      <Footer />
-    </>
+        <p className="text-center text-sm text-gray-500 mt-4">
+          Already have an account? <Link href="/login" className="text-emerald-400 hover:text-emerald-300">Log in</Link>
+        </p>
+      </div>
+    </div>
   )
 }
