@@ -29,14 +29,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
+import { phases } from '@/lib/assets'
 
-/* ── Mock Data ── */
-const balanceOverview = {
-  total: 205000,
-  available: 145000,
-  inPositions: 50000,
-  pending: 10000,
-}
+const balanceOverview = { total: 205000, available: 145000, inPositions: 50000, pending: 10000 }
 
 const phaseBalances = [
   { name: 'Deriv Phase', balance: 125000, currency: 'NGN', change: 2.5 },
@@ -76,261 +71,145 @@ export default function WalletPage() {
   const [transferAmount, setTransferAmount] = useState('')
   const [copied, setCopied] = useState(false)
 
-  const handleCopy = () => {
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+  const handleCopy = () => { setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   return (
-    <div className="min-h-screen pt-20 pb-12">
+    <div className="min-h-screen pt-20 pb-12 bg-white">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2">Wallet</h1>
-          <p className="text-slate-400">Manage your funds across all trading phases</p>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-gray-900">Wallet</h1>
+          <p className="text-gray-500">Manage your funds across all trading phases</p>
         </motion.div>
 
-        {/* Balance Overview */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-[#162D50] border-white/[0.06] col-span-1 sm:col-span-2 lg:col-span-1">
+          <Card className="bg-white border-gray-200 shadow-sm col-span-1 sm:col-span-2 lg:col-span-1">
             <CardContent className="p-6">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-[#00D4AA]/10 flex items-center justify-center">
-                  <WalletIcon className="w-5 h-5 text-[#00D4AA]" />
-                </div>
-                <span className="text-sm text-slate-400">Total Balance</span>
+                <div className="w-10 h-10 rounded-xl bg-[#00A88A]/10 flex items-center justify-center"><WalletIcon className="w-5 h-5 text-[#00A88A]" /></div>
+                <span className="text-sm text-gray-500">Total Balance</span>
               </div>
-              <p className="text-3xl font-bold font-mono text-[#00D4AA]">{formatNaira(balanceOverview.total)}</p>
+              <p className="text-3xl font-bold font-mono text-[#00A88A]">{formatNaira(balanceOverview.total)}</p>
             </CardContent>
           </Card>
-          <Card className="bg-[#162D50] border-white/[0.06]">
-            <CardContent className="p-6">
-              <span className="text-sm text-slate-400">Available</span>
-              <p className="text-xl font-bold font-mono mt-1">{formatNaira(balanceOverview.available)}</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-[#162D50] border-white/[0.06]">
-            <CardContent className="p-6">
-              <span className="text-sm text-slate-400">In Positions</span>
-              <p className="text-xl font-bold font-mono mt-1 text-[#F5A623]">{formatNaira(balanceOverview.inPositions)}</p>
-            </CardContent>
-          </Card>
-          <Card className="bg-[#162D50] border-white/[0.06]">
-            <CardContent className="p-6">
-              <span className="text-sm text-slate-400">Pending</span>
-              <p className="text-xl font-bold font-mono mt-1 text-slate-400">{formatNaira(balanceOverview.pending)}</p>
-            </CardContent>
-          </Card>
+          <Card className="bg-white border-gray-200 shadow-sm"><CardContent className="p-6"><span className="text-sm text-gray-500">Available</span><p className="text-xl font-bold font-mono mt-1 text-gray-900">{formatNaira(balanceOverview.available)}</p></CardContent></Card>
+          <Card className="bg-white border-gray-200 shadow-sm"><CardContent className="p-6"><span className="text-sm text-gray-500">In Positions</span><p className="text-xl font-bold font-mono mt-1 text-[#E5940A]">{formatNaira(balanceOverview.inPositions)}</p></CardContent></Card>
+          <Card className="bg-white border-gray-200 shadow-sm"><CardContent className="p-6"><span className="text-sm text-gray-500">Pending</span><p className="text-xl font-bold font-mono mt-1 text-gray-400">{formatNaira(balanceOverview.pending)}</p></CardContent></Card>
         </motion.div>
 
-        {/* Phase Balances */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          {phaseBalances.map((pb) => (
-            <Card key={pb.name} className="bg-[#162D50] border-white/[0.06] card-hover">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-sm">{pb.name}</h3>
-                  <Badge variant="outline" className={cn('text-[10px] px-1.5 border-0', pb.change >= 0 ? 'bg-[#00D4AA]/10 text-[#00D4AA]' : 'bg-[#FF4D6A]/10 text-[#FF4D6A]')}>
-                    {pb.change >= 0 ? '+' : ''}{pb.change}%
-                  </Badge>
-                </div>
-                <p className="text-2xl font-bold font-mono">{formatNaira(pb.balance)}</p>
-                <p className="text-xs text-slate-500 mt-1">{pb.currency}</p>
-              </CardContent>
-            </Card>
-          ))}
+          {phaseBalances.map((pb) => {
+            const phaseData = phases.find(p => p.name === pb.name)
+            return (
+              <Card key={pb.name} className="bg-white border-gray-200 card-hover shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-sm text-gray-900">{pb.name}</h3>
+                    <Badge variant="outline" className={cn('text-[10px] px-1.5 border-0', pb.change >= 0 ? 'bg-[#00A88A]/10 text-[#00A88A]' : 'bg-[#E63950]/10 text-[#E63950]')}>
+                      {pb.change >= 0 ? '+' : ''}{pb.change}%
+                    </Badge>
+                  </div>
+                  <p className="text-2xl font-bold font-mono text-gray-900">{formatNaira(pb.balance)}</p>
+                  <p className="text-xs text-gray-400 mt-1">{pb.currency}</p>
+                </CardContent>
+              </Card>
+            )
+          })}
         </motion.div>
 
-        {/* Deposit / Withdraw / Transfer Tabs */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mb-8">
           <Tabs defaultValue="deposit">
-            <TabsList className="bg-[#162D50] border border-white/[0.06] mb-6">
-              <TabsTrigger value="deposit" className="data-[state=active]:bg-[#00D4AA] data-[state=active]:text-[#0A1628]">
-                <ArrowDownLeft className="w-4 h-4 mr-1.5" /> Deposit
-              </TabsTrigger>
-              <TabsTrigger value="withdraw" className="data-[state=active]:bg-[#FF4D6A] data-[state=active]:text-white">
-                <ArrowUpRight className="w-4 h-4 mr-1.5" /> Withdraw
-              </TabsTrigger>
-              <TabsTrigger value="transfer" className="data-[state=active]:bg-[#F5A623] data-[state=active]:text-[#0A1628]">
-                <ArrowLeftRight className="w-4 h-4 mr-1.5" /> Transfer
-              </TabsTrigger>
+            <TabsList className="bg-gray-100 border border-gray-200 mb-6">
+              <TabsTrigger value="deposit" className="data-[state=active]:bg-[#00A88A] data-[state=active]:text-white"><ArrowDownLeft className="w-4 h-4 mr-1.5" /> Deposit</TabsTrigger>
+              <TabsTrigger value="withdraw" className="data-[state=active]:bg-[#E63950] data-[state=active]:text-white"><ArrowUpRight className="w-4 h-4 mr-1.5" /> Withdraw</TabsTrigger>
+              <TabsTrigger value="transfer" className="data-[state=active]:bg-[#E5940A] data-[state=active]:text-white"><ArrowLeftRight className="w-4 h-4 mr-1.5" /> Transfer</TabsTrigger>
             </TabsList>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Deposit */}
               <TabsContent value="deposit" className="mt-0">
-                <Card className="bg-[#162D50] border-white/[0.06]">
+                <Card className="bg-white border-gray-200 shadow-sm">
                   <CardContent className="p-6 space-y-4">
-                    <h3 className="font-bold text-lg">Deposit Funds</h3>
-                    <div>
-                      <label className="text-xs text-slate-500 mb-1.5 block">Select Phase</label>
+                    <h3 className="font-bold text-lg text-gray-900">Deposit Funds</h3>
+                    <div><label className="text-xs text-gray-400 mb-1.5 block">Select Phase</label>
                       <Select value={depositPhase} onValueChange={setDepositPhase}>
-                        <SelectTrigger className="bg-white/[0.06] border-white/[0.08] text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#162D50] border-white/[0.08]">
-                          <SelectItem value="Deriv Phase" className="text-white focus:bg-white/[0.08]">Deriv Phase</SelectItem>
-                          <SelectItem value="Wise Phase" className="text-white focus:bg-white/[0.08]">Wise Phase</SelectItem>
-                          <SelectItem value="Eversend Phase" className="text-white focus:bg-white/[0.08]">Eversend Phase</SelectItem>
+                        <SelectTrigger className="bg-white border-gray-200 text-gray-900"><SelectValue /></SelectTrigger>
+                        <SelectContent className="bg-white border-gray-200">
+                          {phases.filter(p => p.status === 'active').map(p => <SelectItem key={p.id} value={p.name} className="text-gray-900 focus:bg-gray-50">{p.name}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>
-                    <div>
-                      <label className="text-xs text-slate-500 mb-1.5 block">Amount (NGN)</label>
-                      <Input type="number" placeholder="Enter amount" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="bg-white/[0.06] border-white/[0.08] text-white font-mono" />
+                    <div><label className="text-xs text-gray-400 mb-1.5 block">Amount (NGN)</label>
+                      <Input type="number" placeholder="Enter amount" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} className="bg-white border-gray-200 text-gray-900 font-mono" />
                       <div className="flex gap-2 mt-2">
                         {[5000, 10000, 25000, 50000].map((amt) => (
-                          <button key={amt} onClick={() => setDepositAmount(amt.toString())} className="px-3 py-1 rounded text-xs bg-white/[0.06] text-slate-400 hover:text-white hover:bg-white/[0.1] transition">
-                            ₦{amt.toLocaleString()}
-                          </button>
+                          <button key={amt} onClick={() => setDepositAmount(amt.toString())} className="px-3 py-1 rounded text-xs bg-gray-100 text-gray-500 hover:text-gray-900 hover:bg-gray-200 transition">₦{amt.toLocaleString()}</button>
                         ))}
                       </div>
                     </div>
-                    <div>
-                      <label className="text-xs text-slate-500 mb-1.5 block">Payment Method</label>
+                    <div><label className="text-xs text-gray-400 mb-1.5 block">Payment Method</label>
                       <div className="grid grid-cols-2 gap-2">
-                        {paymentMethods.map((pm) => {
-                          const Icon = pm.icon
-                          return (
-                            <button
-                              key={pm.id}
-                              onClick={() => setDepositMethod(pm.id)}
-                              className={cn(
-                                'flex items-center gap-2 p-3 rounded-lg border text-sm transition',
-                                depositMethod === pm.id
-                                  ? 'border-[#00D4AA]/30 bg-[#00D4AA]/5 text-white'
-                                  : 'border-white/[0.06] bg-white/[0.04] text-slate-400 hover:text-white hover:bg-white/[0.06]'
-                              )}
-                            >
-                              <Icon className="w-4 h-4" />
-                              {pm.label}
-                            </button>
-                          )
-                        })}
+                        {paymentMethods.map((pm) => { const Icon = pm.icon; return (
+                          <button key={pm.id} onClick={() => setDepositMethod(pm.id)} className={cn('flex items-center gap-2 p-3 rounded-lg border text-sm transition', depositMethod === pm.id ? 'border-[#00A88A]/30 bg-[#00A88A]/5 text-gray-900' : 'border-gray-200 bg-gray-50 text-gray-500 hover:text-gray-900 hover:bg-gray-100')}>
+                            <Icon className="w-4 h-4" />{pm.label}
+                          </button>
+                        )})}
                       </div>
                     </div>
-
-                    {/* Bank details display */}
                     {depositMethod === 'bank' && (
-                      <Card className="bg-white/[0.04] border-white/[0.06]">
+                      <Card className="bg-gray-50 border-gray-200">
                         <CardContent className="p-4 space-y-2">
-                          <p className="text-xs text-slate-500 mb-2">Bank Transfer Details</p>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-slate-400">Bank</span>
-                            <span className="font-medium">Wema Bank</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-slate-400">Account Number</span>
-                            <div className="flex items-center gap-1">
-                              <span className="font-mono font-medium">7825301056</span>
-                              <button onClick={handleCopy} className="text-slate-400 hover:text-[#00D4AA] transition">
-                                {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-[#00D4AA]" /> : <Copy className="w-3.5 h-3.5" />}
-                              </button>
-                            </div>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-slate-400">Account Name</span>
-                            <span className="font-medium">DWEX Technologies Ltd</span>
-                          </div>
+                          <p className="text-xs text-gray-400 mb-2">Bank Transfer Details</p>
+                          <div className="flex justify-between text-sm"><span className="text-gray-500">Bank</span><span className="font-medium text-gray-900">Wema Bank</span></div>
+                          <div className="flex justify-between text-sm"><span className="text-gray-500">Account Number</span><div className="flex items-center gap-1"><span className="font-mono font-medium text-gray-900">7825301056</span><button onClick={handleCopy} className="text-gray-400 hover:text-[#00A88A] transition">{copied ? <CheckCircle2 className="w-3.5 h-3.5 text-[#00A88A]" /> : <Copy className="w-3.5 h-3.5" />}</button></div></div>
+                          <div className="flex justify-between text-sm"><span className="text-gray-500">Account Name</span><span className="font-medium text-gray-900">DWEX Technologies Ltd</span></div>
                         </CardContent>
                       </Card>
                     )}
-
-                    <Button className="w-full bg-[#00D4AA] hover:bg-[#00A888] text-[#0A1628] font-bold py-6 rounded-xl glow-dwex-strong">
-                      Deposit {depositAmount ? `₦${parseInt(depositAmount).toLocaleString()}` : 'Funds'}
-                    </Button>
+                    <Button className="w-full bg-[#00A88A] hover:bg-[#008F74] text-white font-bold py-6 rounded-xl">Deposit {depositAmount ? `₦${parseInt(depositAmount).toLocaleString()}` : 'Funds'}</Button>
                   </CardContent>
                 </Card>
               </TabsContent>
 
-              {/* Withdraw */}
               <TabsContent value="withdraw" className="mt-0">
-                <Card className="bg-[#162D50] border-white/[0.06]">
+                <Card className="bg-white border-gray-200 shadow-sm">
                   <CardContent className="p-6 space-y-4">
-                    <h3 className="font-bold text-lg">Withdraw Funds</h3>
-                    <div>
-                      <label className="text-xs text-slate-500 mb-1.5 block">From Phase</label>
-                      <Select value={withdrawPhase} onValueChange={setWithdrawPhase}>
-                        <SelectTrigger className="bg-white/[0.06] border-white/[0.08] text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#162D50] border-white/[0.08]">
-                          <SelectItem value="Deriv Phase" className="text-white focus:bg-white/[0.08]">Deriv Phase (₦125,000)</SelectItem>
-                          <SelectItem value="Wise Phase" className="text-white focus:bg-white/[0.08]">Wise Phase (₦50,000)</SelectItem>
-                          <SelectItem value="Eversend Phase" className="text-white focus:bg-white/[0.08]">Eversend Phase (₦30,000)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <h3 className="font-bold text-lg text-gray-900">Withdraw Funds</h3>
+                    <div><label className="text-xs text-gray-400 mb-1.5 block">From Phase</label>
+                      <Select value={withdrawPhase} onValueChange={setWithdrawPhase}><SelectTrigger className="bg-white border-gray-200 text-gray-900"><SelectValue /></SelectTrigger><SelectContent className="bg-white border-gray-200">
+                        <SelectItem value="Deriv Phase" className="text-gray-900 focus:bg-gray-50">Deriv Phase (₦125,000)</SelectItem>
+                        <SelectItem value="Wise Phase" className="text-gray-900 focus:bg-gray-50">Wise Phase (₦50,000)</SelectItem>
+                        <SelectItem value="Eversend Phase" className="text-gray-900 focus:bg-gray-50">Eversend Phase (₦30,000)</SelectItem>
+                      </SelectContent></Select>
                     </div>
-                    <div>
-                      <label className="text-xs text-slate-500 mb-1.5 block">Amount (NGN)</label>
-                      <Input type="number" placeholder="Enter amount" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} className="bg-white/[0.06] border-white/[0.08] text-white font-mono" />
-                    </div>
-                    <div>
-                      <label className="text-xs text-slate-500 mb-1.5 block">Bank Account</label>
-                      <Input placeholder="Enter account number" value={withdrawBank} onChange={(e) => setWithdrawBank(e.target.value)} className="bg-white/[0.06] border-white/[0.08] text-white font-mono" />
-                    </div>
-                    <Card className="bg-white/[0.04] border-white/[0.06]">
-                      <CardContent className="p-3 flex items-center justify-between text-sm">
-                        <span className="text-slate-400">Withdrawal Fee</span>
-                        <span className="font-mono font-medium">₦100</span>
-                      </CardContent>
-                    </Card>
-                    <Button className="w-full bg-[#FF4D6A] hover:bg-[#E63E57] text-white font-bold py-6 rounded-xl">
-                      Withdraw {withdrawAmount ? `₦${parseInt(withdrawAmount).toLocaleString()}` : 'Funds'}
-                    </Button>
+                    <div><label className="text-xs text-gray-400 mb-1.5 block">Amount (NGN)</label><Input type="number" placeholder="Enter amount" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} className="bg-white border-gray-200 text-gray-900 font-mono" /></div>
+                    <div><label className="text-xs text-gray-400 mb-1.5 block">Bank Account</label><Input placeholder="Enter account number" value={withdrawBank} onChange={(e) => setWithdrawBank(e.target.value)} className="bg-white border-gray-200 text-gray-900 font-mono" /></div>
+                    <Card className="bg-gray-50 border-gray-200"><CardContent className="p-3 flex items-center justify-between text-sm"><span className="text-gray-500">Withdrawal Fee</span><span className="font-mono font-medium text-gray-900">₦100</span></CardContent></Card>
+                    <Button className="w-full bg-[#E63950] hover:bg-[#c5303f] text-white font-bold py-6 rounded-xl">Withdraw {withdrawAmount ? `₦${parseInt(withdrawAmount).toLocaleString()}` : 'Funds'}</Button>
                   </CardContent>
                 </Card>
               </TabsContent>
 
-              {/* Transfer */}
               <TabsContent value="transfer" className="mt-0">
-                <Card className="bg-[#162D50] border-white/[0.06]">
+                <Card className="bg-white border-gray-200 shadow-sm">
                   <CardContent className="p-6 space-y-4">
-                    <h3 className="font-bold text-lg">Transfer Between Phases</h3>
-                    <div>
-                      <label className="text-xs text-slate-500 mb-1.5 block">From Phase</label>
-                      <Select value={transferFrom} onValueChange={setTransferFrom}>
-                        <SelectTrigger className="bg-white/[0.06] border-white/[0.08] text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#162D50] border-white/[0.08]">
-                          <SelectItem value="Deriv Phase" className="text-white focus:bg-white/[0.08]">Deriv Phase (₦125,000)</SelectItem>
-                          <SelectItem value="Wise Phase" className="text-white focus:bg-white/[0.08]">Wise Phase (₦50,000)</SelectItem>
-                          <SelectItem value="Eversend Phase" className="text-white focus:bg-white/[0.08]">Eversend Phase (₦30,000)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <h3 className="font-bold text-lg text-gray-900">Transfer Between Phases</h3>
+                    <div><label className="text-xs text-gray-400 mb-1.5 block">From Phase</label>
+                      <Select value={transferFrom} onValueChange={setTransferFrom}><SelectTrigger className="bg-white border-gray-200 text-gray-900"><SelectValue /></SelectTrigger><SelectContent className="bg-white border-gray-200">
+                        <SelectItem value="Deriv Phase" className="text-gray-900 focus:bg-gray-50">Deriv Phase (₦125,000)</SelectItem>
+                        <SelectItem value="Wise Phase" className="text-gray-900 focus:bg-gray-50">Wise Phase (₦50,000)</SelectItem>
+                        <SelectItem value="Eversend Phase" className="text-gray-900 focus:bg-gray-50">Eversend Phase (₦30,000)</SelectItem>
+                      </SelectContent></Select>
                     </div>
-                    <div className="flex justify-center">
-                      <div className="w-10 h-10 rounded-full bg-[#F5A623]/10 flex items-center justify-center">
-                        <ArrowLeftRight className="w-5 h-5 text-[#F5A623]" />
-                      </div>
+                    <div className="flex justify-center"><div className="w-10 h-10 rounded-full bg-[#E5940A]/10 flex items-center justify-center"><ArrowLeftRight className="w-5 h-5 text-[#E5940A]" /></div></div>
+                    <div><label className="text-xs text-gray-400 mb-1.5 block">To Phase</label>
+                      <Select value={transferTo} onValueChange={setTransferTo}><SelectTrigger className="bg-white border-gray-200 text-gray-900"><SelectValue /></SelectTrigger><SelectContent className="bg-white border-gray-200">
+                        <SelectItem value="Deriv Phase" className="text-gray-900 focus:bg-gray-50">Deriv Phase</SelectItem>
+                        <SelectItem value="Wise Phase" className="text-gray-900 focus:bg-gray-50">Wise Phase</SelectItem>
+                        <SelectItem value="Eversend Phase" className="text-gray-900 focus:bg-gray-50">Eversend Phase</SelectItem>
+                      </SelectContent></Select>
                     </div>
-                    <div>
-                      <label className="text-xs text-slate-500 mb-1.5 block">To Phase</label>
-                      <Select value={transferTo} onValueChange={setTransferTo}>
-                        <SelectTrigger className="bg-white/[0.06] border-white/[0.08] text-white">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#162D50] border-white/[0.08]">
-                          <SelectItem value="Deriv Phase" className="text-white focus:bg-white/[0.08]">Deriv Phase</SelectItem>
-                          <SelectItem value="Wise Phase" className="text-white focus:bg-white/[0.08]">Wise Phase</SelectItem>
-                          <SelectItem value="Eversend Phase" className="text-white focus:bg-white/[0.08]">Eversend Phase</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label className="text-xs text-slate-500 mb-1.5 block">Amount (NGN)</label>
-                      <Input type="number" placeholder="Enter amount" value={transferAmount} onChange={(e) => setTransferAmount(e.target.value)} className="bg-white/[0.06] border-white/[0.08] text-white font-mono" />
-                    </div>
-                    <Card className="bg-white/[0.04] border-white/[0.06]">
-                      <CardContent className="p-3 flex items-center justify-between text-sm">
-                        <span className="text-slate-400">Transfer Fee</span>
-                        <span className="font-mono font-medium text-[#00D4AA]">Free</span>
-                      </CardContent>
-                    </Card>
-                    <Button className="w-full bg-[#F5A623] hover:bg-[#E09420] text-[#0A1628] font-bold py-6 rounded-xl">
-                      Transfer {transferAmount ? `₦${parseInt(transferAmount).toLocaleString()}` : 'Funds'}
-                    </Button>
+                    <div><label className="text-xs text-gray-400 mb-1.5 block">Amount (NGN)</label><Input type="number" placeholder="Enter amount" value={transferAmount} onChange={(e) => setTransferAmount(e.target.value)} className="bg-white border-gray-200 text-gray-900 font-mono" /></div>
+                    <Card className="bg-gray-50 border-gray-200"><CardContent className="p-3 flex items-center justify-between text-sm"><span className="text-gray-500">Transfer Fee</span><span className="font-mono font-medium text-[#00A88A]">Free</span></CardContent></Card>
+                    <Button className="w-full bg-[#E5940A] hover:bg-[#c57f08] text-white font-bold py-6 rounded-xl">Transfer {transferAmount ? `₦${parseInt(transferAmount).toLocaleString()}` : 'Funds'}</Button>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -338,35 +217,32 @@ export default function WalletPage() {
           </Tabs>
         </motion.div>
 
-        {/* Transaction History */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-          <h2 className="text-xl font-bold mb-4">Transaction History</h2>
-          <Card className="bg-[#162D50] border-white/[0.06] overflow-hidden">
+          <h2 className="text-xl font-bold mb-4 text-gray-900">Transaction History</h2>
+          <Card className="bg-white border-gray-200 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/[0.06]">
-                    <th className="text-left py-3 px-4 text-xs text-slate-500 font-medium">Date</th>
-                    <th className="text-left py-3 px-4 text-xs text-slate-500 font-medium">Type</th>
-                    <th className="text-left py-3 px-4 text-xs text-slate-500 font-medium">Phase</th>
-                    <th className="text-right py-3 px-4 text-xs text-slate-500 font-medium">Amount</th>
-                    <th className="text-right py-3 px-4 text-xs text-slate-500 font-medium">Status</th>
-                  </tr>
-                </thead>
+                <thead><tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 text-xs text-gray-400 font-medium">Date</th>
+                  <th className="text-left py-3 px-4 text-xs text-gray-400 font-medium">Type</th>
+                  <th className="text-left py-3 px-4 text-xs text-gray-400 font-medium">Phase</th>
+                  <th className="text-right py-3 px-4 text-xs text-gray-400 font-medium">Amount</th>
+                  <th className="text-right py-3 px-4 text-xs text-gray-400 font-medium">Status</th>
+                </tr></thead>
                 <tbody>
                   {transactions.map((tx) => (
-                    <tr key={tx.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
-                      <td className="py-3 px-4 text-xs text-slate-400">{tx.date}</td>
-                      <td className="py-3 px-4 font-medium text-xs">{tx.type}</td>
-                      <td className="py-3 px-4 text-xs text-slate-400">{tx.phase}</td>
-                      <td className={cn('py-3 px-4 text-right font-mono font-medium text-xs', tx.amount >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]')}>
+                    <tr key={tx.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-4 text-xs text-gray-500">{tx.date}</td>
+                      <td className="py-3 px-4 font-medium text-xs text-gray-900">{tx.type}</td>
+                      <td className="py-3 px-4 text-xs text-gray-500">{tx.phase}</td>
+                      <td className={cn('py-3 px-4 text-right font-mono font-medium text-xs', tx.amount >= 0 ? 'text-[#00A88A]' : 'text-[#E63950]')}>
                         {tx.amount >= 0 ? '+' : ''}{formatNaira(tx.amount)}
                       </td>
                       <td className="py-3 px-4 text-right">
                         <Badge variant="outline" className={cn('text-[10px] px-1.5 border-0',
-                          tx.status === 'completed' ? 'bg-[#00D4AA]/10 text-[#00D4AA]' :
-                          tx.status === 'pending' ? 'bg-[#F5A623]/10 text-[#F5A623]' :
-                          'bg-[#FF4D6A]/10 text-[#FF4D6A]'
+                          tx.status === 'completed' ? 'bg-[#00A88A]/10 text-[#00A88A]' :
+                          tx.status === 'pending' ? 'bg-[#E5940A]/10 text-[#E5940A]' :
+                          'bg-[#E63950]/10 text-[#E63950]'
                         )}>
                           {tx.status === 'completed' && <CheckCircle2 className="w-2.5 h-2.5 mr-0.5" />}
                           {tx.status === 'pending' && <Clock className="w-2.5 h-2.5 mr-0.5" />}

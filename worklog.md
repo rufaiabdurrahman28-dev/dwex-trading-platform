@@ -76,3 +76,76 @@ Stage Summary:
 - shadcn/ui components used throughout
 - Mobile responsive layouts
 - Auth pages (/login, /signup) hide Navbar/Footer via ConditionalLayout
+
+---
+Task ID: 5
+Agent: Theme Migration Agent
+Task: Update ALL 14+1 DWEX pages for WHITE/LIGHT theme + integrate 1500+ assets
+
+Work Log:
+1. Read worklog and project context — understood existing dark theme pages and new assets.ts data
+2. Read all 15 existing page files to understand current code structure
+3. Read assets.ts to understand the 1500+ asset database and helper functions (searchAssets, getAssetsByCategory, getAssetsByPhase, allAssets, phases, assetCategories)
+4. Fixed bugs in assets.ts: 3 instances of `[K,C]` (undefined) changed to `[KC]` (KuCoin Phase) — this was blocking ALL pages from loading
+5. Updated all 15 page files with complete white/light theme rewrite:
+
+   a. Landing Page (/) — White bg with gradient-to-br from-gray-50 to-white, imported `phases` from assets data for Trading Phases section, teal accent #00A88A, gray-50 ticker bg, white cards with gray-200 borders, Framer Motion animations preserved
+
+   b. Markets Page (/markets) — **MAJOR CHANGE**: Imported allAssets from @/lib/assets, uses searchAssets(), getAssetsByCategory(), getAssetsByPhase() for filtering. Shows ALL 1500+ assets with category tabs showing counts, phase filter with all 18 phases, 50-per-page pagination with "Load More", white cards with hover:border-[#00A88A]/30
+
+   c. Trade Page (/trade) — 3-panel layout: left bg-gray-50, center chart with gray grid, right bg-gray-50. All prices font-mono, #00A88A buy, #E63950 sell. Imports searchAssets for asset selector dropdown. Phase selector uses active phases from assets data
+
+   d. Trade Symbol Page (/trade/[symbol]) — Same white theme. Uses allAssets.find() to resolve symbol from URL params. Links to searchAssets for asset list
+
+   e. Wallet Page (/wallet) — White cards, gray-200 borders, teal balance accents. Phase balances show phase colors. Deposit/withdraw/transfer forms with white inputs
+
+   f. Portfolio Page (/portfolio) — White cards, teal P&L colors, performance chart with #00A88A gradient, white tables with gray borders
+
+   g. Login Page (/login) — Standalone light theme (no Navbar/Footer), bg-gray-50 with teal glow accents, white card with shadow-lg, white inputs with gray-200 borders
+
+   h. Signup Page (/signup) — Same light standalone theme, white card, gray borders, 3-step progress with teal accents
+
+   i. KYC Page (/kyc) — White bg, teal step progress, white form cards, upload areas with dashed gray-200 borders
+
+   j. Brokers Page (/brokers) — Imports `phases` from assets data, shows connected + available phases from the 18 defined phases, white cards with colored icon backgrounds, "Coming Soon" for coming phases
+
+   k. Settings Page (/settings) — White bg, gray sections, teal accent icons, white inputs, danger zone with red border
+
+   l. Price Alerts Page (/alerts) — White bg, gray tables, create alert form with white inputs, teal/badges
+
+   m. Support Page (/support) — White bg, FAQ accordion with gray-200 borders, contact form with white inputs
+
+   n. Admin Dashboard (/admin) — White bg, light cards, tables with gray-200 borders, broker status with colored badges
+
+   o. About Page (/about) — White bg with gray-50 alternating sections, white team/security cards
+
+6. Color Mapping Applied (consistently across all pages):
+   - bg-[#0A1628] → bg-white or bg-gray-50
+   - bg-[#162D50] → bg-white with border-gray-200 and shadow-sm
+   - bg-[#0D1B2E] → bg-gray-50
+   - text-[#00D4AA] → text-[#00A88A]
+   - text-[#FF4D6A] → text-[#E63950]
+   - text-[#F5A623] → text-[#E5940A]
+   - text-white (headings) → text-gray-900
+   - text-slate-400 → text-gray-500
+   - text-slate-500 → text-gray-400
+   - border-white/[0.06] → border-gray-200
+   - bg-white/[0.06] → bg-gray-50 or bg-white
+   - hover:bg-white/[0.06] → hover:bg-gray-50 or hover:bg-gray-100
+   - bg-[#00D4AA] → bg-[#00A88A], hover:bg-[#008F74]
+   - bg-[#FF4D6A] → bg-[#E63950], hover:bg-[#c5303f]
+   - Select dropdowns: bg-white border-gray-200, text-gray-900
+
+7. All 15 page routes verified returning HTTP 200
+8. ESLint: No new errors from updated pages (remaining errors from pre-existing files)
+
+Stage Summary:
+- 15 page files completely rewritten with white/light theme
+- 1500+ assets integrated via @/lib/assets imports (allAssets, searchAssets, getAssetsByCategory, getAssetsByPhase, phases, assetCategories)
+- Markets page now shows ALL assets with pagination (50 per page)
+- Brokers page uses all 18 phases from assets data
+- Trade pages use searchAssets for asset selector
+- Landing page uses phases from assets data
+- Consistent white theme: #00A88A teal accent, #E63950 loss, #E5940A warning
+- Auth pages (/login, /signup) remain standalone (no Navbar/Footer)
+- All pages responsive with Framer Motion animations preserved

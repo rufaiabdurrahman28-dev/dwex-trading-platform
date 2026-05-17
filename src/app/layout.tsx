@@ -32,14 +32,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="antialiased bg-[#0A1628] text-white min-h-screen flex flex-col">
+      <body className="antialiased bg-white text-gray-900 min-h-screen flex flex-col">
         <ConditionalLayout>{children}</ConditionalLayout>
         <Toaster richColors position="top-right" />
       </body>

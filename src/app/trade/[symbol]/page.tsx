@@ -26,25 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-
-/* ── Mock asset data map ── */
-const assetMap: Record<string, { name: string; price: number; change: number; category: string }> = {
-  'EUR/USD': { name: 'Euro / US Dollar', price: 1.0842, change: -0.12, category: 'Forex' },
-  'GBP/USD': { name: 'British Pound / US Dollar', price: 1.2654, change: 0.08, category: 'Forex' },
-  'USD/JPY': { name: 'US Dollar / Japanese Yen', price: 154.32, change: -0.34, category: 'Forex' },
-  'BTC/USD': { name: 'Bitcoin / US Dollar', price: 67245.30, change: 2.14, category: 'Crypto' },
-  'ETH/USD': { name: 'Ethereum / US Dollar', price: 3521.80, change: 1.87, category: 'Crypto' },
-  'SOL/USD': { name: 'Solana / US Dollar', price: 172.30, change: 3.42, category: 'Crypto' },
-  'XAU/USD': { name: 'Gold / US Dollar', price: 2341.50, change: 0.45, category: 'Commodities' },
-  'AAPL': { name: 'Apple Inc.', price: 189.72, change: 1.23, category: 'Stocks' },
-  'TSLA': { name: 'Tesla Inc.', price: 248.50, change: -0.87, category: 'Stocks' },
-  'GOOGL': { name: 'Alphabet Inc.', price: 176.42, change: 0.65, category: 'Stocks' },
-  'NVDA': { name: 'NVIDIA Corp.', price: 875.28, change: 2.34, category: 'Stocks' },
-  'SPX500': { name: 'S&P 500 Index', price: 5278.40, change: 0.56, category: 'Indices' },
-  'NAS100': { name: 'NASDAQ 100 Index', price: 18452.30, change: 0.78, category: 'Indices' },
-}
-
-const popularAssets = Object.entries(assetMap).map(([symbol, data]) => ({ symbol, ...data }))
+import { allAssets, phases, searchAssets } from '@/lib/assets'
 
 const openPositions = [
   { id: 1, symbol: 'BTC/USD', type: 'Buy' as const, size: 0.05, entry: 66800.00, current: 67245.30, pnl: 22.27, pnlPct: 0.67, phase: 'Deriv Phase' },
@@ -67,10 +49,12 @@ const closedTrades = [
 const timeframes = ['1m', '5m', '15m', '1H', '4H', '1D', '1W']
 const leverageOptions = [1, 5, 10, 25, 50, 100]
 
+const popularAssets = allAssets.slice(0, 20)
+
 export default function SymbolTradePage() {
   const params = useParams()
   const symbol = decodeURIComponent(params.symbol as string)
-  const assetData = assetMap[symbol] || { name: symbol, price: 0, change: 0, category: 'Unknown' }
+  const assetData = allAssets.find(a => a.symbol === symbol) || { name: symbol, price: 0, change: 0, category: 'forex' as const, phases: [] as string[], symbol }
 
   const [orderSide, setOrderSide] = useState<'buy' | 'sell'>('buy')
   const [orderType, setOrderType] = useState<'market' | 'limit' | 'stop'>('market')
@@ -83,61 +67,63 @@ export default function SymbolTradePage() {
   const [assetSearch, setAssetSearch] = useState('')
   const [showAssetList, setShowAssetList] = useState(false)
 
-  const filteredAssets = popularAssets.filter(
-    (a) => a.symbol.toLowerCase().includes(assetSearch.toLowerCase())
-  )
+  const filteredAssets = assetSearch ? searchAssets(assetSearch).slice(0, 20) : popularAssets
 
   const leveragVal = leverageOptions[leverage[0]]
   const estMargin = amount ? (parseFloat(amount) / leveragVal).toFixed(2) : '0.00'
 
+  const formatPrice = (price: number) => {
+    if (price >= 1000) return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    if (price < 1) return price.toFixed(4)
+    return price.toFixed(2)
+  }
+
   return (
-    <div className="min-h-screen pt-16">
+    <div className="min-h-screen pt-16 bg-white">
       <div className="h-[calc(100vh-4rem)] flex flex-col lg:flex-row">
         {/* ── Left Panel: Asset Info ── */}
-        <div className="lg:w-64 xl:w-72 border-r border-white/[0.06] bg-[#0D1B2E]/50 flex-shrink-0 overflow-hidden">
+        <div className="lg:w-64 xl:w-72 border-r border-gray-200 bg-gray-50 flex-shrink-0 overflow-hidden">
           <div className="p-4">
-            {/* Back button */}
-            <Link href="/trade" className="flex items-center gap-1 text-xs text-slate-400 hover:text-white mb-3 transition">
+            <Link href="/trade" className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-900 mb-3 transition">
               <ArrowLeft className="w-3.5 h-3.5" />
               All Assets
             </Link>
 
-            {/* Asset selector */}
             <div className="relative mb-4">
               <button
                 onClick={() => setShowAssetList(!showAssetList)}
-                className="w-full flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-white/[0.08] hover:border-white/[0.12] transition"
+                className="w-full flex items-center justify-between p-3 rounded-lg bg-white border border-gray-200 hover:border-[#00A88A]/30 transition"
               >
-                <div>
-                  <span className="font-bold text-sm">{symbol}</span>
-                  <span className="text-xs text-slate-500 ml-2">{assetData.category}</span>
+                <div className="text-left">
+                  <span className="font-bold text-sm text-gray-900">{symbol}</span>
+                  <span className="text-xs text-gray-400 ml-2 capitalize">{assetData.category}</span>
                 </div>
-                <ChevronDown className={cn('w-4 h-4 text-slate-400 transition-transform', showAssetList && 'rotate-180')} />
+                <ChevronDown className={cn('w-4 h-4 text-gray-400 transition-transform', showAssetList && 'rotate-180')} />
               </button>
               {showAssetList && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-[#162D50] border border-white/[0.08] rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto">
                   <div className="p-2">
                     <div className="relative">
-                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                       <Input
                         placeholder="Search..."
                         value={assetSearch}
                         onChange={(e) => setAssetSearch(e.target.value)}
-                        className="pl-8 h-8 text-xs bg-white/[0.06] border-white/[0.08]"
+                        className="pl-8 h-8 text-xs bg-white border-gray-200 text-gray-900"
                       />
                     </div>
                   </div>
-                  {filteredAssets.map((asset) => (
-                    <Link key={asset.symbol} href={`/trade/${encodeURIComponent(asset.symbol)}`}>
+                  {filteredAssets.map((a) => (
+                    <Link key={a.symbol} href={`/trade/${encodeURIComponent(a.symbol)}`}>
                       <button
                         className={cn(
-                          'w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-white/[0.06] transition',
-                          symbol === asset.symbol && 'bg-[#00D4AA]/10'
+                          'w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-gray-50 transition',
+                          symbol === a.symbol && 'bg-[#00A88A]/10'
                         )}
                       >
-                        <span className="font-medium">{asset.symbol}</span>
-                        <span className={cn('font-mono text-xs', asset.change >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]')}>
-                          {asset.change >= 0 ? '+' : ''}{asset.change}%
+                        <span className="font-medium text-gray-900">{a.symbol}</span>
+                        <span className={cn('font-mono text-xs', a.change >= 0 ? 'text-[#00A88A]' : 'text-[#E63950]')}>
+                          {a.change >= 0 ? '+' : ''}{a.change}%
                         </span>
                       </button>
                     </Link>
@@ -146,66 +132,50 @@ export default function SymbolTradePage() {
               )}
             </div>
 
-            {/* Current Price */}
             <div className="mb-4">
-              <p className="text-xs text-slate-500 mb-1">Current Price</p>
+              <p className="text-xs text-gray-400 mb-1">Current Price</p>
               <p className={cn(
                 'text-2xl font-bold font-mono',
-                assetData.change >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]'
+                assetData.change >= 0 ? 'text-[#00A88A]' : 'text-[#E63950]'
               )}>
-                {assetData.price >= 1000
-                  ? assetData.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                  : assetData.price.toFixed(assetData.price < 1 ? 4 : 2)}
+                {formatPrice(assetData.price)}
               </p>
               <div className="flex items-center gap-2 mt-1">
-                {assetData.change >= 0 ? (
-                  <TrendingUp className="w-4 h-4 text-[#00D4AA]" />
-                ) : (
-                  <TrendingDown className="w-4 h-4 text-[#FF4D6A]" />
-                )}
-                <span className={cn('text-sm font-mono font-medium', assetData.change >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]')}>
+                {assetData.change >= 0 ? <TrendingUp className="w-4 h-4 text-[#00A88A]" /> : <TrendingDown className="w-4 h-4 text-[#E63950]" />}
+                <span className={cn('text-sm font-mono font-medium', assetData.change >= 0 ? 'text-[#00A88A]' : 'text-[#E63950]')}>
                   {assetData.change >= 0 ? '+' : ''}{assetData.change}%
                 </span>
-                <span className="text-xs text-slate-500">24h</span>
+                <span className="text-xs text-gray-400">24h</span>
               </div>
             </div>
 
-            {/* Bid/Ask */}
             <div className="grid grid-cols-2 gap-2 mb-4">
-              <div className="p-2 rounded-lg bg-[#00D4AA]/5 border border-[#00D4AA]/10">
-                <p className="text-[10px] text-slate-500">BID</p>
-                <p className="font-mono font-semibold text-sm text-[#00D4AA]">
-                  {(assetData.price - (assetData.price * 0.0002)).toFixed(assetData.price < 1 ? 4 : 2)}
-                </p>
+              <div className="p-2 rounded-lg bg-[#00A88A]/5 border border-[#00A88A]/10">
+                <p className="text-[10px] text-gray-400">BID</p>
+                <p className="font-mono font-semibold text-sm text-[#00A88A]">{formatPrice(assetData.price * 0.9998)}</p>
               </div>
-              <div className="p-2 rounded-lg bg-[#FF4D6A]/5 border border-[#FF4D6A]/10">
-                <p className="text-[10px] text-slate-500">ASK</p>
-                <p className="font-mono font-semibold text-sm text-[#FF4D6A]">
-                  {(assetData.price + (assetData.price * 0.0002)).toFixed(assetData.price < 1 ? 4 : 2)}
-                </p>
+              <div className="p-2 rounded-lg bg-[#E63950]/5 border border-[#E63950]/10">
+                <p className="text-[10px] text-gray-400">ASK</p>
+                <p className="font-mono font-semibold text-sm text-[#E63950]">{formatPrice(assetData.price * 1.0002)}</p>
               </div>
             </div>
 
-            {/* Spread */}
-            <div className="text-center p-2 rounded-lg bg-white/[0.04] mb-4">
-              <p className="text-[10px] text-slate-500">SPREAD</p>
-              <p className="font-mono text-sm font-medium">0.4 pips</p>
+            <div className="text-center p-2 rounded-lg bg-gray-100 mb-4">
+              <p className="text-[10px] text-gray-400">SPREAD</p>
+              <p className="font-mono text-sm font-medium text-gray-900">0.4 pips</p>
             </div>
 
-            {/* Quick assets */}
             <div className="space-y-1">
-              <p className="text-xs text-slate-500 mb-2">Popular</p>
-              {popularAssets.slice(0, 5).map((asset) => (
-                <Link key={asset.symbol} href={`/trade/${encodeURIComponent(asset.symbol)}`}>
-                  <button
-                    className={cn(
-                      'w-full flex items-center justify-between px-2 py-1.5 rounded text-xs hover:bg-white/[0.04] transition',
-                      symbol === asset.symbol && 'bg-[#00D4AA]/10'
-                    )}
-                  >
-                    <span className="font-medium">{asset.symbol}</span>
-                    <span className={cn('font-mono', asset.change >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]')}>
-                      {asset.change >= 0 ? '+' : ''}{asset.change}%
+              <p className="text-xs text-gray-400 mb-2">Popular</p>
+              {popularAssets.slice(0, 5).map((a) => (
+                <Link key={a.symbol} href={`/trade/${encodeURIComponent(a.symbol)}`}>
+                  <button className={cn(
+                    'w-full flex items-center justify-between px-2 py-1.5 rounded text-xs hover:bg-gray-100 transition',
+                    symbol === a.symbol && 'bg-[#00A88A]/10'
+                  )}>
+                    <span className="font-medium text-gray-900">{a.symbol}</span>
+                    <span className={cn('font-mono', a.change >= 0 ? 'text-[#00A88A]' : 'text-[#E63950]')}>
+                      {a.change >= 0 ? '+' : ''}{a.change}%
                     </span>
                   </button>
                 </Link>
@@ -216,68 +186,66 @@ export default function SymbolTradePage() {
 
         {/* ── Center: Chart Area ── */}
         <div className="flex-1 flex flex-col min-w-0">
-          {/* Chart header */}
-          <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.06] bg-[#0D1B2E]/30">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 bg-white">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-sm">{symbol}</span>
-              <span className="text-xs text-slate-500">{assetData.name}</span>
+              <span className="font-bold text-sm text-gray-900">{symbol}</span>
+              <span className="text-xs text-gray-400">{assetData.name}</span>
               <Badge variant="outline" className={cn(
                 'text-[10px] px-1.5 border-0',
-                assetData.change >= 0 ? 'bg-[#00D4AA]/10 text-[#00D4AA]' : 'bg-[#FF4D6A]/10 text-[#FF4D6A]'
+                assetData.change >= 0 ? 'bg-[#00A88A]/10 text-[#00A88A]' : 'bg-[#E63950]/10 text-[#E63950]'
               )}>
                 {assetData.change >= 0 ? '+' : ''}{assetData.change}%
               </Badge>
             </div>
             <div className="flex items-center gap-1">
               {timeframes.map((tf) => (
-                <button key={tf} className="px-2 py-1 rounded text-xs font-medium text-slate-400 hover:text-white hover:bg-white/[0.06] transition">
+                <button key={tf} className="px-2 py-1 rounded text-xs font-medium text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition">
                   {tf}
                 </button>
               ))}
-              <button className="p-1.5 rounded hover:bg-white/[0.06] transition ml-1">
-                <Settings2 className="w-4 h-4 text-slate-400" />
+              <button className="p-1.5 rounded hover:bg-gray-100 transition ml-1">
+                <Settings2 className="w-4 h-4 text-gray-400" />
               </button>
             </div>
           </div>
 
-          {/* Chart placeholder */}
-          <div className="flex-1 relative bg-gradient-to-b from-[#0D1B2E]/80 to-[#0A1628] flex items-center justify-center min-h-[300px]">
-            <div className="absolute inset-0 opacity-5">
+          <div className="flex-1 relative bg-gray-50 flex items-center justify-center min-h-[300px]">
+            <div className="absolute inset-0 opacity-10">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={`h-${i}`} className="absolute w-full border-t border-white/10" style={{ top: `${(i + 1) * 12.5}%` }} />
+                <div key={`h-${i}`} className="absolute w-full border-t border-gray-300" style={{ top: `${(i + 1) * 12.5}%` }} />
               ))}
               {Array.from({ length: 10 }).map((_, i) => (
-                <div key={`v-${i}`} className="absolute h-full border-l border-white/10" style={{ left: `${(i + 1) * 10}%` }} />
+                <div key={`v-${i}`} className="absolute h-full border-l border-gray-300" style={{ left: `${(i + 1) * 10}%` }} />
               ))}
             </div>
             <svg className="absolute inset-0 w-full h-full opacity-20" preserveAspectRatio="none" viewBox="0 0 1000 400">
               <defs>
                 <linearGradient id="chartGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor={assetData.change >= 0 ? '#00D4AA' : '#FF4D6A'} stopOpacity="0.3" />
-                  <stop offset="100%" stopColor={assetData.change >= 0 ? '#00D4AA' : '#FF4D6A'} stopOpacity="0" />
+                  <stop offset="0%" stopColor={assetData.change >= 0 ? '#00A88A' : '#E63950'} stopOpacity="0.3" />
+                  <stop offset="100%" stopColor={assetData.change >= 0 ? '#00A88A' : '#E63950'} stopOpacity="0" />
                 </linearGradient>
               </defs>
-              <path d="M0,300 L50,280 L100,290 L150,250 L200,260 L250,220 L300,230 L350,200 L400,210 L450,180 L500,190 L550,160 L600,170 L650,140 L700,150 L750,120 L800,130 L850,100 L900,110 L950,80 L1000,90" stroke={assetData.change >= 0 ? '#00D4AA' : '#FF4D6A'} strokeWidth="2" fill="none" />
+              <path d="M0,300 L50,280 L100,290 L150,250 L200,260 L250,220 L300,230 L350,200 L400,210 L450,180 L500,190 L550,160 L600,170 L650,140 L700,150 L750,120 L800,130 L850,100 L900,110 L950,80 L1000,90" stroke={assetData.change >= 0 ? '#00A88A' : '#E63950'} strokeWidth="2" fill="none" />
               <path d="M0,300 L50,280 L100,290 L150,250 L200,260 L250,220 L300,230 L350,200 L400,210 L450,180 L500,190 L550,160 L600,170 L650,140 L700,150 L750,120 L800,130 L850,100 L900,110 L950,80 L1000,90 L1000,400 L0,400 Z" fill="url(#chartGrad2)" />
             </svg>
             <div className="relative z-10 text-center">
-              <p className="text-slate-400 text-sm">{symbol} Chart</p>
-              <p className="text-slate-500 text-xs mt-1">Real-time chart will load here</p>
+              <p className="text-gray-400 text-sm">{symbol} Chart</p>
+              <p className="text-gray-300 text-xs mt-1">Real-time chart will load here</p>
             </div>
           </div>
 
-          {/* ── Bottom Panel: Positions ── */}
-          <div className="border-t border-white/[0.06] bg-[#0D1B2E]/50 max-h-[280px] overflow-hidden">
+          {/* Bottom Panel */}
+          <div className="border-t border-gray-200 bg-white max-h-[280px] overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <div className="flex items-center border-b border-white/[0.06] px-4">
+              <div className="flex items-center border-b border-gray-200 px-4">
                 <TabsList className="bg-transparent h-9 p-0">
-                  <TabsTrigger value="positions" className="text-xs h-9 px-3 data-[state=active]:bg-transparent data-[state=active]:text-[#00D4AA] data-[state=active]:border-b-2 data-[state=active]:border-[#00D4AA] rounded-none">
+                  <TabsTrigger value="positions" className="text-xs h-9 px-3 data-[state=active]:bg-transparent data-[state=active]:text-[#00A88A] data-[state=active]:border-b-2 data-[state=active]:border-[#00A88A] rounded-none text-gray-500">
                     Open ({openPositions.length})
                   </TabsTrigger>
-                  <TabsTrigger value="pending" className="text-xs h-9 px-3 data-[state=active]:bg-transparent data-[state=active]:text-[#00D4AA] data-[state=active]:border-b-2 data-[state=active]:border-[#00D4AA] rounded-none">
+                  <TabsTrigger value="pending" className="text-xs h-9 px-3 data-[state=active]:bg-transparent data-[state=active]:text-[#00A88A] data-[state=active]:border-b-2 data-[state=active]:border-[#00A88A] rounded-none text-gray-500">
                     Pending ({pendingOrders.length})
                   </TabsTrigger>
-                  <TabsTrigger value="closed" className="text-xs h-9 px-3 data-[state=active]:bg-transparent data-[state=active]:text-[#00D4AA] data-[state=active]:border-b-2 data-[state=active]:border-[#00D4AA] rounded-none">
+                  <TabsTrigger value="closed" className="text-xs h-9 px-3 data-[state=active]:bg-transparent data-[state=active]:text-[#00A88A] data-[state=active]:border-b-2 data-[state=active]:border-[#00A88A] rounded-none text-gray-500">
                     Closed ({closedTrades.length})
                   </TabsTrigger>
                 </TabsList>
@@ -286,7 +254,7 @@ export default function SymbolTradePage() {
               <TabsContent value="positions" className="mt-0 overflow-y-auto max-h-[220px]">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="text-slate-500 border-b border-white/[0.06]">
+                    <tr className="text-gray-400 border-b border-gray-100">
                       <th className="text-left py-2 px-4 font-medium">Symbol</th>
                       <th className="text-left py-2 px-2 font-medium">Type</th>
                       <th className="text-right py-2 px-2 font-medium">Size</th>
@@ -298,23 +266,19 @@ export default function SymbolTradePage() {
                   </thead>
                   <tbody>
                     {openPositions.map((pos) => (
-                      <tr key={pos.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
-                        <td className="py-2 px-4 font-medium">{pos.symbol}</td>
+                      <tr key={pos.id} className="border-b border-gray-50 hover:bg-gray-50">
+                        <td className="py-2 px-4 font-medium text-gray-900">{pos.symbol}</td>
                         <td className="py-2 px-2">
-                          <Badge variant="outline" className={cn('text-[10px] px-1.5 border-0', pos.type === 'Buy' ? 'bg-[#00D4AA]/10 text-[#00D4AA]' : 'bg-[#FF4D6A]/10 text-[#FF4D6A]')}>
-                            {pos.type}
-                          </Badge>
+                          <Badge variant="outline" className={cn('text-[10px] px-1.5 border-0', pos.type === 'Buy' ? 'bg-[#00A88A]/10 text-[#00A88A]' : 'bg-[#E63950]/10 text-[#E63950]')}>{pos.type}</Badge>
                         </td>
-                        <td className="py-2 px-2 text-right font-mono">{pos.size}</td>
-                        <td className="py-2 px-2 text-right font-mono">{pos.entry.toFixed(pos.entry < 1 ? 4 : 2)}</td>
-                        <td className="py-2 px-2 text-right font-mono">{pos.current.toFixed(pos.current < 1 ? 4 : 2)}</td>
-                        <td className={cn('py-2 px-2 text-right font-mono font-medium', pos.pnl >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]')}>
+                        <td className="py-2 px-2 text-right font-mono text-gray-700">{pos.size}</td>
+                        <td className="py-2 px-2 text-right font-mono text-gray-700">{pos.entry.toFixed(pos.entry < 1 ? 4 : 2)}</td>
+                        <td className="py-2 px-2 text-right font-mono text-gray-700">{pos.current.toFixed(pos.current < 1 ? 4 : 2)}</td>
+                        <td className={cn('py-2 px-2 text-right font-mono font-medium', pos.pnl >= 0 ? 'text-[#00A88A]' : 'text-[#E63950]')}>
                           {pos.pnl >= 0 ? '+' : ''}{pos.pnl.toFixed(2)} ({pos.pnlPct >= 0 ? '+' : ''}{pos.pnlPct.toFixed(2)}%)
                         </td>
                         <td className="py-2 px-4 text-right">
-                          <button className="p-1 rounded hover:bg-[#FF4D6A]/10 transition">
-                            <X className="w-3.5 h-3.5 text-[#FF4D6A]" />
-                          </button>
+                          <button className="p-1 rounded hover:bg-[#E63950]/10 transition"><X className="w-3.5 h-3.5 text-[#E63950]" /></button>
                         </td>
                       </tr>
                     ))}
@@ -324,29 +288,15 @@ export default function SymbolTradePage() {
 
               <TabsContent value="pending" className="mt-0 overflow-y-auto max-h-[220px]">
                 <table className="w-full text-xs">
-                  <thead>
-                    <tr className="text-slate-500 border-b border-white/[0.06]">
-                      <th className="text-left py-2 px-4 font-medium">Symbol</th>
-                      <th className="text-left py-2 px-2 font-medium">Type</th>
-                      <th className="text-right py-2 px-2 font-medium">Price</th>
-                      <th className="text-right py-2 px-2 font-medium">Size</th>
-                      <th className="text-right py-2 px-4 font-medium">Action</th>
-                    </tr>
-                  </thead>
+                  <thead><tr className="text-gray-400 border-b border-gray-100"><th className="text-left py-2 px-4 font-medium">Symbol</th><th className="text-left py-2 px-2 font-medium">Type</th><th className="text-right py-2 px-2 font-medium">Price</th><th className="text-right py-2 px-2 font-medium">Size</th><th className="text-right py-2 px-4 font-medium">Action</th></tr></thead>
                   <tbody>
                     {pendingOrders.map((order) => (
-                      <tr key={order.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
-                        <td className="py-2 px-4 font-medium">{order.symbol}</td>
-                        <td className="py-2 px-2">
-                          <Badge variant="outline" className="text-[10px] px-1.5 border-0 bg-[#F5A623]/10 text-[#F5A623]">{order.type}</Badge>
-                        </td>
-                        <td className="py-2 px-2 text-right font-mono">{order.price.toFixed(2)}</td>
-                        <td className="py-2 px-2 text-right font-mono">{order.size}</td>
-                        <td className="py-2 px-4 text-right">
-                          <button className="p-1 rounded hover:bg-[#FF4D6A]/10 transition">
-                            <X className="w-3.5 h-3.5 text-[#FF4D6A]" />
-                          </button>
-                        </td>
+                      <tr key={order.id} className="border-b border-gray-50 hover:bg-gray-50">
+                        <td className="py-2 px-4 font-medium text-gray-900">{order.symbol}</td>
+                        <td className="py-2 px-2"><Badge variant="outline" className="text-[10px] px-1.5 border-0 bg-[#E5940A]/10 text-[#E5940A]">{order.type}</Badge></td>
+                        <td className="py-2 px-2 text-right font-mono text-gray-700">{order.price.toFixed(2)}</td>
+                        <td className="py-2 px-2 text-right font-mono text-gray-700">{order.size}</td>
+                        <td className="py-2 px-4 text-right"><button className="p-1 rounded hover:bg-[#E63950]/10 transition"><X className="w-3.5 h-3.5 text-[#E63950]" /></button></td>
                       </tr>
                     ))}
                   </tbody>
@@ -355,29 +305,15 @@ export default function SymbolTradePage() {
 
               <TabsContent value="closed" className="mt-0 overflow-y-auto max-h-[220px]">
                 <table className="w-full text-xs">
-                  <thead>
-                    <tr className="text-slate-500 border-b border-white/[0.06]">
-                      <th className="text-left py-2 px-4 font-medium">Symbol</th>
-                      <th className="text-left py-2 px-2 font-medium">Type</th>
-                      <th className="text-right py-2 px-2 font-medium">Size</th>
-                      <th className="text-right py-2 px-2 font-medium">P&L</th>
-                      <th className="text-right py-2 px-4 font-medium">Date</th>
-                    </tr>
-                  </thead>
+                  <thead><tr className="text-gray-400 border-b border-gray-100"><th className="text-left py-2 px-4 font-medium">Symbol</th><th className="text-left py-2 px-2 font-medium">Type</th><th className="text-right py-2 px-2 font-medium">Size</th><th className="text-right py-2 px-2 font-medium">P&L</th><th className="text-right py-2 px-4 font-medium">Date</th></tr></thead>
                   <tbody>
                     {closedTrades.map((trade) => (
-                      <tr key={trade.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
-                        <td className="py-2 px-4 font-medium">{trade.symbol}</td>
-                        <td className="py-2 px-2">
-                          <Badge variant="outline" className={cn('text-[10px] px-1.5 border-0', trade.type === 'Buy' ? 'bg-[#00D4AA]/10 text-[#00D4AA]' : 'bg-[#FF4D6A]/10 text-[#FF4D6A]')}>
-                            {trade.type}
-                          </Badge>
-                        </td>
-                        <td className="py-2 px-2 text-right font-mono">{trade.size}</td>
-                        <td className={cn('py-2 px-2 text-right font-mono font-medium', trade.pnl >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]')}>
-                          {trade.pnl >= 0 ? '+' : ''}{trade.pnl.toFixed(2)}
-                        </td>
-                        <td className="py-2 px-4 text-right text-slate-500">{trade.date}</td>
+                      <tr key={trade.id} className="border-b border-gray-50 hover:bg-gray-50">
+                        <td className="py-2 px-4 font-medium text-gray-900">{trade.symbol}</td>
+                        <td className="py-2 px-2"><Badge variant="outline" className={cn('text-[10px] px-1.5 border-0', trade.type === 'Buy' ? 'bg-[#00A88A]/10 text-[#00A88A]' : 'bg-[#E63950]/10 text-[#E63950]')}>{trade.type}</Badge></td>
+                        <td className="py-2 px-2 text-right font-mono text-gray-700">{trade.size}</td>
+                        <td className={cn('py-2 px-2 text-right font-mono font-medium', trade.pnl >= 0 ? 'text-[#00A88A]' : 'text-[#E63950]')}>{trade.pnl >= 0 ? '+' : ''}{trade.pnl.toFixed(2)}</td>
+                        <td className="py-2 px-4 text-right text-gray-400">{trade.date}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -388,119 +324,75 @@ export default function SymbolTradePage() {
         </div>
 
         {/* ── Right Panel: Order Panel ── */}
-        <div className="lg:w-80 xl:w-96 border-l border-white/[0.06] bg-[#0D1B2E]/50 flex-shrink-0 overflow-y-auto">
+        <div className="lg:w-80 xl:w-96 border-l border-gray-200 bg-gray-50 flex-shrink-0 overflow-y-auto">
           <div className="p-4 space-y-4">
-            {/* Phase selector */}
             <div>
-              <label className="text-xs text-slate-500 mb-1.5 block">Trading Phase</label>
+              <label className="text-xs text-gray-400 mb-1.5 block">Trading Phase</label>
               <Select value={phase} onValueChange={setPhase}>
-                <SelectTrigger className="bg-white/[0.06] border-white/[0.08] text-white text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-[#162D50] border-white/[0.08]">
-                  <SelectItem value="Deriv Phase" className="text-white focus:bg-white/[0.08]">Deriv Phase</SelectItem>
-                  <SelectItem value="Wise Phase" className="text-white focus:bg-white/[0.08]">Wise Phase</SelectItem>
-                  <SelectItem value="Eversend Phase" className="text-white focus:bg-white/[0.08]">Eversend Phase</SelectItem>
+                <SelectTrigger className="bg-white border-gray-200 text-gray-900 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-white border-gray-200">
+                  {phases.filter(p => p.status === 'active').map((p) => (
+                    <SelectItem key={p.id} value={p.name} className="text-gray-900 focus:bg-gray-50">{p.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Buy/Sell Toggle */}
             <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => setOrderSide('buy')}
-                className={cn(
-                  'py-3 rounded-lg font-bold text-sm transition-all',
-                  orderSide === 'buy' ? 'bg-[#00D4AA] text-[#0A1628] glow-dwex' : 'bg-[#00D4AA]/10 text-[#00D4AA] hover:bg-[#00D4AA]/20'
-                )}
-              >
-                Buy
-              </button>
-              <button
-                onClick={() => setOrderSide('sell')}
-                className={cn(
-                  'py-3 rounded-lg font-bold text-sm transition-all',
-                  orderSide === 'sell' ? 'bg-[#FF4D6A] text-white glow-dwex' : 'bg-[#FF4D6A]/10 text-[#FF4D6A] hover:bg-[#FF4D6A]/20'
-                )}
-              >
-                Sell
-              </button>
+              <button onClick={() => setOrderSide('buy')} className={cn('py-3 rounded-lg font-bold text-sm transition-all', orderSide === 'buy' ? 'bg-[#00A88A] text-white' : 'bg-[#00A88A]/10 text-[#00A88A] hover:bg-[#00A88A]/20')}>Buy</button>
+              <button onClick={() => setOrderSide('sell')} className={cn('py-3 rounded-lg font-bold text-sm transition-all', orderSide === 'sell' ? 'bg-[#E63950] text-white' : 'bg-[#E63950]/10 text-[#E63950] hover:bg-[#E63950]/20')}>Sell</button>
             </div>
 
-            {/* Order Type */}
             <div>
-              <label className="text-xs text-slate-500 mb-1.5 block">Order Type</label>
+              <label className="text-xs text-gray-400 mb-1.5 block">Order Type</label>
               <div className="grid grid-cols-3 gap-1.5">
                 {(['market', 'limit', 'stop'] as const).map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setOrderType(type)}
-                    className={cn(
-                      'py-2 rounded-lg text-xs font-medium transition capitalize',
-                      orderType === type ? 'bg-white/[0.12] text-white' : 'bg-white/[0.04] text-slate-400 hover:text-white hover:bg-white/[0.06]'
-                    )}
-                  >
-                    {type}
-                  </button>
+                  <button key={type} onClick={() => setOrderType(type)} className={cn('py-2 rounded-lg text-xs font-medium transition capitalize', orderType === type ? 'bg-gray-200 text-gray-900' : 'bg-gray-100 text-gray-400 hover:text-gray-700 hover:bg-gray-200')}>{type}</button>
                 ))}
               </div>
             </div>
 
-            {/* Amount */}
             <div>
-              <label className="text-xs text-slate-500 mb-1.5 block">Amount (USD)</label>
+              <label className="text-xs text-gray-400 mb-1.5 block">Amount (USD)</label>
               <div className="relative">
-                <Input type="number" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} className="bg-white/[0.06] border-white/[0.08] text-white font-mono pr-12" />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">USD</span>
+                <Input type="number" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} className="bg-white border-gray-200 text-gray-900 font-mono pr-12" />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">USD</span>
               </div>
             </div>
 
-            {/* Leverage */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs text-slate-500">Leverage</label>
-                <span className="text-xs font-mono font-bold text-[#00D4AA]">{leveragVal}x</span>
+                <label className="text-xs text-gray-400">Leverage</label>
+                <span className="text-xs font-mono font-bold text-[#00A88A]">{leveragVal}x</span>
               </div>
               <Slider value={leverage} onValueChange={setLeverage} max={5} step={1} className="py-2" />
               <div className="flex justify-between mt-1">
                 {leverageOptions.map((l) => (
-                  <button key={l} onClick={() => setLeverage([leverageOptions.indexOf(l)])} className={cn('text-[10px] font-mono px-1.5 py-0.5 rounded', leveragVal === l ? 'text-[#00D4AA] bg-[#00D4AA]/10' : 'text-slate-500')}>
-                    {l}x
-                  </button>
+                  <button key={l} onClick={() => setLeverage([leverageOptions.indexOf(l)])} className={cn('text-[10px] font-mono px-1.5 py-0.5 rounded', leveragVal === l ? 'text-[#00A88A] bg-[#00A88A]/10' : 'text-gray-400')}>{l}x</button>
                 ))}
               </div>
             </div>
 
-            {/* Stop Loss / Take Profit */}
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-slate-500 mb-1.5 block">Stop Loss</label>
-                <Input type="number" placeholder="0.00" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} className="bg-white/[0.06] border-white/[0.08] text-white font-mono text-sm" />
-              </div>
-              <div>
-                <label className="text-xs text-slate-500 mb-1.5 block">Take Profit</label>
-                <Input type="number" placeholder="0.00" value={takeProfit} onChange={(e) => setTakeProfit(e.target.value)} className="bg-white/[0.06] border-white/[0.08] text-white font-mono text-sm" />
-              </div>
+              <div><label className="text-xs text-gray-400 mb-1.5 block">Stop Loss</label><Input type="number" placeholder="0.00" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} className="bg-white border-gray-200 text-gray-900 font-mono text-sm" /></div>
+              <div><label className="text-xs text-gray-400 mb-1.5 block">Take Profit</label><Input type="number" placeholder="0.00" value={takeProfit} onChange={(e) => setTakeProfit(e.target.value)} className="bg-white border-gray-200 text-gray-900 font-mono text-sm" /></div>
             </div>
 
-            {/* Estimated Margin */}
-            <Card className="bg-white/[0.04] border-white/[0.06]">
+            <Card className="bg-gray-100 border-gray-200">
               <CardContent className="p-3 flex items-center justify-between">
-                <span className="text-xs text-slate-500">Est. Margin</span>
-                <span className="font-mono text-sm font-semibold">${estMargin}</span>
+                <span className="text-xs text-gray-400">Est. Margin</span>
+                <span className="font-mono text-sm font-semibold text-gray-900">${estMargin}</span>
               </CardContent>
             </Card>
 
-            {/* Open Position Button */}
-            <Button className={cn('w-full py-6 text-base font-bold rounded-xl transition-all', orderSide === 'buy' ? 'bg-[#00D4AA] hover:bg-[#00A888] text-[#0A1628] glow-dwex-strong' : 'bg-[#FF4D6A] hover:bg-[#E63E57] text-white')}>
+            <Button className={cn('w-full py-6 text-base font-bold rounded-xl transition-all', orderSide === 'buy' ? 'bg-[#00A88A] hover:bg-[#008F74] text-white' : 'bg-[#E63950] hover:bg-[#c5303f] text-white')}>
               {orderSide === 'buy' ? 'Open Buy Position' : 'Open Sell Position'}
             </Button>
 
-            {/* Order summary */}
-            <div className="space-y-1.5 pt-2 border-t border-white/[0.06]">
-              <div className="flex justify-between text-xs"><span className="text-slate-500">Symbol</span><span className="font-medium">{symbol}</span></div>
-              <div className="flex justify-between text-xs"><span className="text-slate-500">Phase</span><span className="font-medium">{phase}</span></div>
-              <div className="flex justify-between text-xs"><span className="text-slate-500">Type</span><span className="font-medium capitalize">{orderType}</span></div>
+            <div className="space-y-1.5 pt-2 border-t border-gray-200">
+              <div className="flex justify-between text-xs"><span className="text-gray-400">Symbol</span><span className="font-medium text-gray-900">{symbol}</span></div>
+              <div className="flex justify-between text-xs"><span className="text-gray-400">Phase</span><span className="font-medium text-gray-900">{phase}</span></div>
+              <div className="flex justify-between text-xs"><span className="text-gray-400">Type</span><span className="font-medium text-gray-900 capitalize">{orderType}</span></div>
             </div>
           </div>
         </div>

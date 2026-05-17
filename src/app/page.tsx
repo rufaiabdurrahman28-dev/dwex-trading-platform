@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { phases } from '@/lib/assets'
 
 /* ── Mock ticker data ── */
 const tickerItems = [
@@ -28,31 +29,6 @@ const tickerItems = [
   { symbol: 'USD/JPY', price: '154.32', change: '-0.34%', up: false },
   { symbol: 'S&P 500', price: '5,278.40', change: '+0.56%', up: true },
   { symbol: 'SOL/USD', price: '172.30', change: '+3.42%', up: true },
-]
-
-/* ── Broker phases ── */
-const phases = [
-  {
-    name: 'Deriv Phase',
-    description: 'Forex, Synthetics, Crypto',
-    assets: '200+',
-    rawtin: '₦1,650/$',
-    color: '#00D4AA',
-  },
-  {
-    name: 'Wise Phase',
-    description: 'Fiat transfers, Multi-currency',
-    assets: '50+',
-    rawtin: '₦1,620/$',
-    color: '#33DDBB',
-  },
-  {
-    name: 'Eversend Phase',
-    description: 'African currencies, Wallet',
-    assets: '30+',
-    rawtin: '₦1,635/$',
-    color: '#F5A623',
-  },
 ]
 
 /* ── Features ── */
@@ -100,11 +76,11 @@ export default function LandingPage() {
   return (
     <div className="overflow-hidden">
       {/* ── Hero Section ── */}
-      <section className="relative min-h-[90vh] flex items-center justify-center pt-16">
+      <section className="relative min-h-[90vh] flex items-center justify-center pt-16 bg-gradient-to-br from-gray-50 to-white">
         {/* Background glows */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#00D4AA]/5 rounded-full blur-[120px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#00D4AA]/3 rounded-full blur-[100px]" />
+          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#00A88A]/5 rounded-full blur-[120px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#00A88A]/3 rounded-full blur-[100px]" />
         </div>
 
         <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -116,8 +92,8 @@ export default function LandingPage() {
           >
             {/* Badge */}
             <motion.div variants={fadeUp} custom={0} className="mb-6">
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00D4AA]/10 border border-[#00D4AA]/20 text-[#00D4AA] text-sm font-medium">
-                <span className="w-2 h-2 rounded-full bg-[#00D4AA] animate-pulse-green" />
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00A88A]/10 border border-[#00A88A]/20 text-[#00A88A] text-sm font-medium">
+                <span className="w-2 h-2 rounded-full bg-[#00A88A] animate-pulse" />
                 Live Trading Active
               </span>
             </motion.div>
@@ -126,7 +102,7 @@ export default function LandingPage() {
             <motion.h1
               variants={fadeUp}
               custom={1}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight mb-6"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight mb-6 text-gray-900"
             >
               Trade Across Brokers,{' '}
               <span className="text-gradient-dwex">One Platform</span>
@@ -136,10 +112,10 @@ export default function LandingPage() {
             <motion.p
               variants={fadeUp}
               custom={2}
-              className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto mb-10"
+              className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10"
             >
-              Access <span className="text-white font-semibold">1,500+ assets</span> across{' '}
-              <span className="text-white font-semibold">20+ brokers</span>. Deposit in Naira ₦,
+              Access <span className="text-gray-900 font-semibold">1,500+ assets</span> across{' '}
+              <span className="text-gray-900 font-semibold">20+ brokers</span>. Deposit in Naira ₦,
               trade globally. Forex, Stocks, Crypto, Commodities, Indices & ETFs — all in one place.
             </motion.p>
 
@@ -152,7 +128,7 @@ export default function LandingPage() {
               <Link href="/signup">
                 <Button
                   size="lg"
-                  className="bg-[#00D4AA] hover:bg-[#00A888] text-[#0A1628] font-bold text-base px-8 py-6 rounded-xl glow-dwex-strong transition-all hover:shadow-[#00D4AA]/30"
+                  className="bg-[#00A88A] hover:bg-[#008F74] text-white font-bold text-base px-8 py-6 rounded-xl transition-all hover:shadow-lg hover:shadow-[#00A88A]/20"
                 >
                   Start Trading
                   <ArrowRight className="w-5 h-5 ml-2" />
@@ -162,7 +138,7 @@ export default function LandingPage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-white/[0.12] text-white hover:bg-white/[0.06] font-semibold text-base px-8 py-6 rounded-xl"
+                  className="border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold text-base px-8 py-6 rounded-xl"
                 >
                   Explore Markets
                 </Button>
@@ -183,13 +159,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── Price Ticker ── */}
-      <section className="relative py-4 border-y border-white/[0.06] bg-[#0D1B2E]/50 overflow-hidden">
+      <section className="relative py-4 border-y border-gray-200 bg-gray-50 overflow-hidden">
         <div className="animate-ticker flex whitespace-nowrap">
           {[...tickerItems, ...tickerItems].map((item, i) => (
             <div key={i} className="inline-flex items-center gap-3 px-6">
-              <span className="text-sm font-medium text-slate-300">{item.symbol}</span>
-              <span className="text-sm font-mono font-medium text-white">{item.price}</span>
-              <span className={`text-xs font-mono font-medium ${item.up ? 'text-[#00D4AA]' : 'text-[#FF4D6A]'}`}>
+              <span className="text-sm font-medium text-gray-600">{item.symbol}</span>
+              <span className="text-sm font-mono font-medium text-gray-900">{item.price}</span>
+              <span className={`text-xs font-mono font-medium ${item.up ? 'text-[#00A88A]' : 'text-[#E63950]'}`}>
                 {item.change}
               </span>
             </div>
@@ -198,7 +174,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Trading Phases ── */}
-      <section className="py-20 sm:py-28">
+      <section className="py-20 sm:py-28 bg-white">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
@@ -207,10 +183,10 @@ export default function LandingPage() {
             variants={stagger}
             className="text-center mb-14"
           >
-            <motion.h2 variants={fadeUp} custom={0} className="text-3xl sm:text-4xl font-bold mb-4">
+            <motion.h2 variants={fadeUp} custom={0} className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900">
               Trading <span className="text-gradient-dwex">Phases</span>
             </motion.h2>
-            <motion.p variants={fadeUp} custom={1} className="text-slate-400 text-lg max-w-xl mx-auto">
+            <motion.p variants={fadeUp} custom={1} className="text-gray-500 text-lg max-w-xl mx-auto">
               Each connected broker creates a trading phase with unique assets and rates.
             </motion.p>
           </motion.div>
@@ -222,9 +198,9 @@ export default function LandingPage() {
             variants={stagger}
             className="grid grid-cols-1 md:grid-cols-3 gap-6"
           >
-            {phases.map((phase, i) => (
+            {phases.filter(p => p.status === 'active').map((phase, i) => (
               <motion.div key={phase.name} variants={fadeUp} custom={i}>
-                <Card className="bg-[#162D50] border-white/[0.06] card-hover rounded-2xl overflow-hidden">
+                <Card className="bg-white border-gray-200 card-hover rounded-2xl overflow-hidden shadow-sm">
                   <CardContent className="p-6">
                     <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
@@ -232,16 +208,16 @@ export default function LandingPage() {
                     >
                       <Layers className="w-6 h-6" style={{ color: phase.color }} />
                     </div>
-                    <h3 className="text-xl font-bold mb-1">{phase.name}</h3>
-                    <p className="text-slate-400 text-sm mb-4">{phase.description}</p>
-                    <div className="flex items-center justify-between pt-4 border-t border-white/[0.06]">
+                    <h3 className="text-xl font-bold mb-1 text-gray-900">{phase.name}</h3>
+                    <p className="text-gray-500 text-sm mb-4">{phase.description}</p>
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                       <div>
-                        <p className="text-xs text-slate-500">Assets</p>
-                        <p className="text-lg font-bold font-mono">{phase.assets}</p>
+                        <p className="text-xs text-gray-400">Assets</p>
+                        <p className="text-lg font-bold font-mono text-gray-900">{phase.assetCount}+</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-slate-500">RAWTIN Rate</p>
-                        <p className="text-lg font-bold font-mono text-[#00D4AA]">{phase.rawtin}</p>
+                        <p className="text-xs text-gray-400">RAWTIN Rate</p>
+                        <p className="text-lg font-bold font-mono text-[#00A88A]">{phase.rawtin}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -253,7 +229,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Features Grid ── */}
-      <section className="py-20 sm:py-28 bg-[#0D1B2E]/30">
+      <section className="py-20 sm:py-28 bg-gray-50">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
@@ -262,10 +238,10 @@ export default function LandingPage() {
             variants={stagger}
             className="text-center mb-14"
           >
-            <motion.h2 variants={fadeUp} custom={0} className="text-3xl sm:text-4xl font-bold mb-4">
+            <motion.h2 variants={fadeUp} custom={0} className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900">
               Why <span className="text-gradient-dwex">DWEX</span>?
             </motion.h2>
-            <motion.p variants={fadeUp} custom={1} className="text-slate-400 text-lg max-w-xl mx-auto">
+            <motion.p variants={fadeUp} custom={1} className="text-gray-500 text-lg max-w-xl mx-auto">
               Everything you need to trade globally, built for the Nigerian market.
             </motion.p>
           </motion.div>
@@ -281,13 +257,13 @@ export default function LandingPage() {
               const Icon = feat.icon
               return (
                 <motion.div key={feat.title} variants={fadeUp} custom={i}>
-                  <Card className="bg-[#162D50] border-white/[0.06] card-hover rounded-2xl h-full">
+                  <Card className="bg-white border-gray-200 card-hover rounded-2xl h-full shadow-sm">
                     <CardContent className="p-6">
-                      <div className="w-12 h-12 rounded-xl bg-[#00D4AA]/10 flex items-center justify-center mb-4">
-                        <Icon className="w-6 h-6 text-[#00D4AA]" />
+                      <div className="w-12 h-12 rounded-xl bg-[#00A88A]/10 flex items-center justify-center mb-4">
+                        <Icon className="w-6 h-6 text-[#00A88A]" />
                       </div>
-                      <h3 className="text-lg font-bold mb-2">{feat.title}</h3>
-                      <p className="text-slate-400 text-sm leading-relaxed">{feat.desc}</p>
+                      <h3 className="text-lg font-bold mb-2 text-gray-900">{feat.title}</h3>
+                      <p className="text-gray-500 text-sm leading-relaxed">{feat.desc}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -298,7 +274,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Stats Bar ── */}
-      <section className="py-16">
+      <section className="py-16 bg-white">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
@@ -312,12 +288,12 @@ export default function LandingPage() {
                 key={stat.label}
                 variants={fadeUp}
                 custom={i}
-                className="text-center p-6 rounded-2xl bg-[#162D50] border border-white/[0.06]"
+                className="text-center p-6 rounded-2xl bg-white border border-gray-200 shadow-sm"
               >
-                <p className="text-3xl sm:text-4xl font-extrabold font-mono text-[#00D4AA] mb-1">
+                <p className="text-3xl sm:text-4xl font-extrabold font-mono text-[#00A88A] mb-1">
                   {stat.value}
                 </p>
-                <p className="text-slate-400 text-sm font-medium">{stat.label}</p>
+                <p className="text-gray-500 text-sm font-medium">{stat.label}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -325,7 +301,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── How It Works ── */}
-      <section className="py-20 sm:py-28 bg-[#0D1B2E]/30">
+      <section className="py-20 sm:py-28 bg-gray-50">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial="hidden"
@@ -334,10 +310,10 @@ export default function LandingPage() {
             variants={stagger}
             className="text-center mb-14"
           >
-            <motion.h2 variants={fadeUp} custom={0} className="text-3xl sm:text-4xl font-bold mb-4">
+            <motion.h2 variants={fadeUp} custom={0} className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900">
               How It <span className="text-gradient-dwex">Works</span>
             </motion.h2>
-            <motion.p variants={fadeUp} custom={1} className="text-slate-400 text-lg max-w-xl mx-auto">
+            <motion.p variants={fadeUp} custom={1} className="text-gray-500 text-lg max-w-xl mx-auto">
               Get started in four simple steps.
             </motion.p>
           </motion.div>
@@ -351,18 +327,18 @@ export default function LandingPage() {
           >
             {steps.map((step, i) => (
               <motion.div key={step.step} variants={fadeUp} custom={i} className="relative">
-                <Card className="bg-[#162D50] border-white/[0.06] card-hover rounded-2xl h-full">
+                <Card className="bg-white border-gray-200 card-hover rounded-2xl h-full shadow-sm">
                   <CardContent className="p-6 text-center">
-                    <div className="w-14 h-14 rounded-full bg-[#00D4AA]/10 border border-[#00D4AA]/20 flex items-center justify-center mx-auto mb-4">
-                      <span className="text-xl font-bold font-mono text-[#00D4AA]">{step.step}</span>
+                    <div className="w-14 h-14 rounded-full bg-[#00A88A]/10 border border-[#00A88A]/20 flex items-center justify-center mx-auto mb-4">
+                      <span className="text-xl font-bold font-mono text-[#00A88A]">{step.step}</span>
                     </div>
-                    <h3 className="text-lg font-bold mb-2">{step.title}</h3>
-                    <p className="text-slate-400 text-sm">{step.desc}</p>
+                    <h3 className="text-lg font-bold mb-2 text-gray-900">{step.title}</h3>
+                    <p className="text-gray-500 text-sm">{step.desc}</p>
                   </CardContent>
                 </Card>
                 {i < steps.length - 1 && (
                   <div className="hidden lg:flex absolute top-1/2 -right-3 z-10">
-                    <ChevronRight className="w-6 h-6 text-[#00D4AA]/40" />
+                    <ChevronRight className="w-6 h-6 text-[#00A88A]/40" />
                   </div>
                 )}
               </motion.div>
@@ -372,7 +348,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA Section ── */}
-      <section className="py-20 sm:py-28">
+      <section className="py-20 sm:py-28 bg-white">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -381,20 +357,19 @@ export default function LandingPage() {
             transition={{ duration: 0.7 }}
             className="relative rounded-3xl overflow-hidden"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-[#00D4AA]/20 to-[#00D4AA]/5" />
-            <div className="absolute inset-0 bg-[#162D50]/80" />
-            <div className="relative z-10 py-16 sm:py-20 px-6 sm:px-12 text-center">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+            <div className="absolute inset-0 bg-gradient-to-r from-[#00A88A]/10 to-[#00A88A]/5" />
+            <div className="relative z-10 bg-gray-50 py-16 sm:py-20 px-6 sm:px-12 text-center border border-gray-200 rounded-3xl">
+              <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900">
                 Ready to Start <span className="text-gradient-dwex">Trading</span>?
               </h2>
-              <p className="text-slate-400 text-lg max-w-lg mx-auto mb-8">
+              <p className="text-gray-500 text-lg max-w-lg mx-auto mb-8">
                 Join thousands of traders who are already trading across brokers on DWEX.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link href="/signup">
                   <Button
                     size="lg"
-                    className="bg-[#00D4AA] hover:bg-[#00A888] text-[#0A1628] font-bold text-base px-8 py-6 rounded-xl glow-dwex-strong"
+                    className="bg-[#00A88A] hover:bg-[#008F74] text-white font-bold text-base px-8 py-6 rounded-xl"
                   >
                     Create Free Account
                     <ArrowRight className="w-5 h-5 ml-2" />
@@ -404,7 +379,7 @@ export default function LandingPage() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-white/[0.12] text-white hover:bg-white/[0.06] font-semibold text-base px-8 py-6 rounded-xl"
+                    className="border-gray-200 text-gray-700 hover:bg-gray-50 font-semibold text-base px-8 py-6 rounded-xl"
                   >
                     Need Help?
                   </Button>
