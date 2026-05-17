@@ -1,43 +1,152 @@
-export default function Footer() {
+'use client'
+
+import Link from 'next/link'
+import Image from 'next/image'
+import {
+  Twitter,
+  Instagram,
+  Youtube,
+  MessageCircle,
+  Mail,
+  MapPin,
+} from 'lucide-react'
+
+const footerSections = [
+  {
+    title: 'Markets',
+    links: [
+      { label: 'Forex', href: '/markets?tab=forex' },
+      { label: 'Stocks', href: '/markets?tab=stocks' },
+      { label: 'Crypto', href: '/markets?tab=crypto' },
+      { label: 'Commodities', href: '/markets?tab=commodities' },
+      { label: 'Indices', href: '/markets?tab=indices' },
+      { label: 'ETFs', href: '/markets?tab=etfs' },
+    ],
+  },
+  {
+    title: 'Trading',
+    links: [
+      { label: 'Trade Now', href: '/trade' },
+      { label: 'Trading Phases', href: '/brokers' },
+      { label: 'Price Alerts', href: '/alerts' },
+      { label: 'Portfolio', href: '/portfolio' },
+      { label: 'Wallet', href: '/wallet' },
+    ],
+  },
+  {
+    title: 'Company',
+    links: [
+      { label: 'About DWEX', href: '/about' },
+      { label: 'Careers', href: '#' },
+      { label: 'Blog', href: '#' },
+      { label: 'Contact', href: '/support' },
+      { label: 'Partners', href: '#' },
+    ],
+  },
+  {
+    title: 'Legal',
+    links: [
+      { label: 'Terms of Service', href: '#' },
+      { label: 'Privacy Policy', href: '#' },
+      { label: 'Risk Disclosure', href: '#' },
+      { label: 'KYC Policy', href: '/kyc' },
+      { label: 'AML Policy', href: '#' },
+    ],
+  },
+]
+
+const socialLinks = [
+  { icon: Twitter, href: 'https://twitter.com/dwex', label: 'Twitter' },
+  { icon: Instagram, href: 'https://instagram.com/dwex', label: 'Instagram' },
+  { icon: Youtube, href: 'https://youtube.com/@dwex', label: 'YouTube' },
+  { icon: MessageCircle, href: 'https://t.me/dwex', label: 'Telegram' },
+]
+
+export function Footer() {
   return (
-    <div className="D D3">
-      <footer className="footer">
-        <div className="footer-about">
-          <h4 className="footer-heading">About Us</h4>
-          <p className="footer-text">
-            Aroyan Muslim School is committed to nurturing students with strong Islamic values
-            while providing quality Western education.
+    <footer className="bg-[#0D1B2E] border-t border-white/[0.06] mt-auto">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Top section */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
+          {footerSections.map((section) => (
+            <div key={section.title}>
+              <h4 className="font-semibold text-sm text-white mb-4">
+                {section.title}
+              </h4>
+              <ul className="space-y-2.5">
+                {section.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-slate-400 hover:text-[#00D4AA] transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Middle section - Logo + Social + Contact */}
+        <div className="border-t border-white/[0.06] pt-8 pb-6 flex flex-col md:flex-row items-center justify-between gap-6">
+          {/* Logo + tagline */}
+          <div className="flex items-center gap-3">
+            <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-[#00D4AA]/20">
+              <Image
+                src="/dwex-logo.jpg"
+                alt="DWEX Logo"
+                fill
+                className="object-cover"
+                sizes="32px"
+              />
+            </div>
+            <div>
+              <span className="font-bold text-lg">DWEX</span>
+              <p className="text-xs text-slate-500">Trade Across Brokers, One Platform</p>
+            </div>
+          </div>
+
+          {/* Social links */}
+          <div className="flex items-center gap-3">
+            {socialLinks.map((social) => {
+              const Icon = social.icon
+              return (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-slate-400 hover:text-[#00D4AA] hover:border-[#00D4AA]/20 transition-all"
+                  aria-label={social.label}
+                >
+                  <Icon className="w-4 h-4" />
+                </a>
+              )
+            })}
+          </div>
+
+          {/* Contact */}
+          <div className="flex items-center gap-4 text-sm text-slate-500">
+            <span className="flex items-center gap-1.5">
+              <Mail className="w-3.5 h-3.5" />
+              support@dwex.io
+            </span>
+          </div>
+        </div>
+
+        {/* Bottom section */}
+        <div className="border-t border-white/[0.06] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-slate-600">
+            &copy; {new Date().getFullYear()} DWEX. All rights reserved.
+          </p>
+          <p className="text-xs text-slate-600 text-center sm:text-right max-w-xl">
+            Trading involves significant risk of loss. DWEX is a broker aggregator and does not hold client funds.
+            All trades are executed through connected brokers. Past performance is not indicative of future results.
           </p>
         </div>
-
-        <div className="social-icons">
-          <a
-            href="https://wa.me/YOUR_SCHOOL_NUMBER"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="social-icon whatsapp"
-            aria-label="WhatsApp"
-          >
-            <svg viewBox="0 0 32 32" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16.003 2h-.006C8.266 2 2 8.264 2 16c0 3.066 1.01 5.9 2.72 8.16L2.96 27.16l3.204-1.024A13.94 13.94 0 0 0 16.003 30C23.734 30 30 23.734 30 16S23.734 2 16.003 2zm8.104 21.384c-.34.96-1.684 1.76-2.752 1.996-.74.16-1.704.284-4.952-1.064-4.156-1.724-6.832-5.944-7.04-6.216-.2-.272-1.66-2.212-1.66-4.22s1.048-2.996 1.416-3.408c.34-.38.74-.476.988-.476.248 0 .496.004.712.012.228.01.536-.088.84.64.312.74 1.06 2.588 1.152 2.776.092.188.156.408.032.656-.124.252-.188.408-.376.628-.188.22-.396.492-.564.66-.188.188-.384.392-.164.768.22.376.98 1.612 2.104 2.612 1.448 1.288 2.668 1.688 3.044 1.876.376.188.596.16.816-.096.22-.26.94-1.096 1.192-1.472.252-.376.5-.312.844-.188.344.124 2.184 1.032 2.56 1.22.376.188.628.28.72.436.092.156.092.904-.248 1.864z" fill="#25D366"/>
-            </svg>
-          </a>
-          <a
-            href="https://t.me/YOUR_SCHOOL_CHANNEL"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="social-icon telegram"
-            aria-label="Telegram"
-          >
-            <svg viewBox="0 0 32 32" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 2C8.268 2 2 8.268 2 16s6.268 14 14 14 14-6.268 14-14S23.732 2 16 2zm6.768 9.588l-2.18 10.264c-.16.72-.588.896-1.192.556l-3.296-2.428-1.588 1.528c-.176.176-.324.324-.664.324l.236-3.36 6.18-5.584c.272-.236-.056-.368-.416-.132l-7.64 4.808-3.288-1.024c-.716-.224-.732-.716.148-1.06l12.856-4.956c.592-.216 1.108.144.916 1.068z" fill="#0088cc"/>
-            </svg>
-          </a>
-        </div>
-
-        <p className="footer-contact">Contact: info@aroyanschool.edu | +234-XXX-XXX-XXXX</p>
-        <p className="footer-copyright">&copy; 2026 Aroyan Muslim School</p>
-      </footer>
-    </div>
+      </div>
+    </footer>
   )
 }

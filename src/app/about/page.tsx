@@ -1,140 +1,339 @@
 'use client'
 
-import { useEffect } from 'react'
-import Navbar from '@/components/shared/Navbar'
-import Footer from '@/components/shared/Footer'
+import { motion } from 'framer-motion'
+import Image from 'next/image'
+import Link from 'next/link'
+import {
+  Layers,
+  Shield,
+  Lock,
+  Eye,
+  Server,
+  ArrowRight,
+  Users,
+  Globe,
+  Zap,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+
+/* ── How it works ── */
+const howItWorks = [
+  {
+    icon: Layers,
+    title: 'Aggregates Brokers',
+    desc: 'DWEX connects to multiple brokers and consolidates their assets, pricing, and execution into a single interface.',
+    color: '#00D4AA',
+  },
+  {
+    icon: Shield,
+    title: 'Holds No Funds',
+    desc: 'DWEX never holds client funds. All deposits are held by regulated brokers. We are a technology layer, not a custodian.',
+    color: '#33DDBB',
+  },
+  {
+    icon: Globe,
+    title: 'One Interface',
+    desc: 'Trade across all your connected brokers from one dashboard. Transfer positions, manage risk, and track performance seamlessly.',
+    color: '#F5A623',
+  },
+]
+
+/* ── Team members ── */
+const team = [
+  { name: 'Adebayo Okonkwo', role: 'CEO & Founder', initials: 'AO' },
+  { name: 'Chidinma Okafor', role: 'CTO', initials: 'CO' },
+  { name: 'Emeka Nwosu', role: 'Head of Trading', initials: 'EN' },
+  { name: 'Fatima Abdullahi', role: 'Head of Compliance', initials: 'FA' },
+]
+
+/* ── Security features ── */
+const securityFeatures = [
+  { icon: Lock, title: 'End-to-End Encryption', desc: 'All data is encrypted in transit and at rest using AES-256 encryption.' },
+  { icon: Shield, title: 'Two-Layer KYC', desc: 'Platform-level and broker-level identity verification for maximum security.' },
+  { icon: Eye, title: 'Real-Time Monitoring', desc: '24/7 monitoring of all transactions and account activities for fraud prevention.' },
+  { icon: Server, title: 'Secure Infrastructure', desc: 'Hosted on enterprise-grade cloud infrastructure with 99.9% uptime SLA.' },
+  { icon: Lock, title: 'Transaction PIN', desc: 'Optional transaction PIN required for withdrawals and high-value transfers.' },
+  { icon: Shield, title: 'Regulated Brokers', desc: 'All connected brokers are regulated by their respective financial authorities.' },
+]
+
+/* ── Partner brokers ── */
+const partners = [
+  'Deriv', 'Wise', 'Eversend', 'OctaFX', 'XM', 'Exness',
+  'IC Markets', 'FBS', 'HFM', 'Pepperstone',
+]
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.1, duration: 0.6, ease: 'easeOut' },
+  }),
+}
+
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } },
+}
 
 export default function AboutPage() {
-  useEffect(() => {
-    const items = document.querySelectorAll('.about-animate')
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const item = entry.target as HTMLElement
-            const index = Array.from(items).indexOf(item)
-            setTimeout(() => {
-              item.classList.add('slide-in-visible')
-            }, index * 200)
-            observer.unobserve(item)
-          }
-        })
-      },
-      { threshold: 0.15 }
-    )
-
-    items.forEach((item) => observer.observe(item))
-
-    return () => {
-      items.forEach((item) => observer.unobserve(item))
-    }
-  }, [])
-
   return (
-    <>
-      {/* ==================== D1 - Header + Hero ==================== */}
-      <div className="D D1 D1-short">
-        <Navbar />
+    <div className="min-h-screen pt-20 pb-12">
+      {/* Hero */}
+      <section className="relative py-16 sm:py-24 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-[#00D4AA]/5 rounded-full blur-[120px]" />
+        </div>
 
-        <section className="page-hero">
-          <h1 className="page-hero-title">About Aroyan Muslim School</h1>
-          <p className="page-hero-subtitle">
-            Nurturing minds with faith, knowledge, and character since our founding
-          </p>
-        </section>
-      </div>
+        <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div initial="hidden" animate="visible" variants={stagger}>
+            <motion.h1
+              variants={fadeUp}
+              custom={0}
+              className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-6"
+            >
+              About <span className="text-gradient-dwex">DWEX</span>
+            </motion.h1>
+            <motion.p
+              variants={fadeUp}
+              custom={1}
+              className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto"
+            >
+              The first broker aggregator platform built for the African market.
+              Trade across brokers, deposit in Naira, trade globally.
+            </motion.p>
+          </motion.div>
+        </div>
+      </section>
 
-      {/* ==================== D2 - About Content ==================== */}
-      <div className="D D2 D2-auto">
-        <section className="about-section">
-          {/* Mission & Vision */}
-          <div className="about-block about-animate">
-            <div className="about-block-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feature-svg">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 16v-4" />
-                <path d="M12 8h.01" />
-              </svg>
-            </div>
-            <div className="about-block-content">
-              <h2 className="about-block-title">Our Mission</h2>
-              <p className="about-block-text">
-                Aroyan Muslim School is dedicated to providing a holistic education that seamlessly
-                integrates Quranic memorization and Islamic disciplines with a rigorous Western academic
-                curriculum. Our mission is to develop students who are not only academically excellent but
-                also deeply rooted in their faith, moral values, and commitment to serving their community.
-                We believe that true education shapes both the intellect and the soul, preparing our
-                students to become responsible, compassionate leaders of tomorrow.
+      {/* Mission */}
+      <section className="py-16 bg-[#0D1B2E]/30">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="max-w-3xl mx-auto text-center"
+          >
+            <motion.h2 variants={fadeUp} custom={0} className="text-2xl sm:text-3xl font-bold mb-6">
+              Our Mission
+            </motion.h2>
+            <motion.p variants={fadeUp} custom={1} className="text-slate-400 text-lg leading-relaxed">
+              DWEX was created to solve a fundamental problem: African traders are limited by single-broker access,
+              fragmented platforms, and currency barriers. We aggregate multiple brokers into one interface,
+              enabling traders to access the best prices, broadest asset selection, and most reliable execution —
+              all while depositing and withdrawing in Naira.
+            </motion.p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* How DWEX Works */}
+      <section className="py-16">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="text-center mb-12"
+          >
+            <motion.h2 variants={fadeUp} custom={0} className="text-2xl sm:text-3xl font-bold mb-4">
+              How DWEX Works
+            </motion.h2>
+            <motion.p variants={fadeUp} custom={1} className="text-slate-400 max-w-xl mx-auto">
+              Three core principles that define our platform.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
+            {howItWorks.map((item, i) => {
+              const Icon = item.icon
+              return (
+                <motion.div key={item.title} variants={fadeUp} custom={i}>
+                  <Card className="bg-[#162D50] border-white/[0.06] card-hover rounded-2xl h-full">
+                    <CardContent className="p-6 text-center">
+                      <div className="w-14 h-14 rounded-xl mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: `${item.color}15` }}>
+                        <Icon className="w-7 h-7" style={{ color: item.color }} />
+                      </div>
+                      <h3 className="text-lg font-bold mb-3">{item.title}</h3>
+                      <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )
+            })}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Team */}
+      <section className="py-16 bg-[#0D1B2E]/30">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="text-center mb-12"
+          >
+            <motion.h2 variants={fadeUp} custom={0} className="text-2xl sm:text-3xl font-bold mb-4">
+              Our Team
+            </motion.h2>
+            <motion.p variants={fadeUp} custom={1} className="text-slate-400 max-w-xl mx-auto">
+              Built by a team of finance and technology professionals from across Africa.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="grid grid-cols-2 md:grid-cols-4 gap-6"
+          >
+            {team.map((member, i) => (
+              <motion.div key={member.name} variants={fadeUp} custom={i}>
+                <Card className="bg-[#162D50] border-white/[0.06] card-hover rounded-2xl">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 rounded-full bg-[#00D4AA]/10 border border-[#00D4AA]/20 flex items-center justify-center mx-auto mb-3">
+                      <span className="text-lg font-bold text-[#00D4AA]">{member.initials}</span>
+                    </div>
+                    <h3 className="font-bold text-sm mb-1">{member.name}</h3>
+                    <p className="text-xs text-slate-500">{member.role}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Security */}
+      <section className="py-16">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="text-center mb-12"
+          >
+            <motion.h2 variants={fadeUp} custom={0} className="text-2xl sm:text-3xl font-bold mb-4">
+              Security & <span className="text-gradient-dwex">Trust</span>
+            </motion.h2>
+            <motion.p variants={fadeUp} custom={1} className="text-slate-400 max-w-xl mx-auto">
+              Your security is our top priority. Here&apos;s how we protect you.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {securityFeatures.map((feat, i) => {
+              const Icon = feat.icon
+              return (
+                <motion.div key={feat.title} variants={fadeUp} custom={i}>
+                  <Card className="bg-[#162D50] border-white/[0.06] card-hover rounded-2xl h-full">
+                    <CardContent className="p-5">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-9 h-9 rounded-lg bg-[#00D4AA]/10 flex items-center justify-center">
+                          <Icon className="w-4 h-4 text-[#00D4AA]" />
+                        </div>
+                        <h3 className="font-bold text-sm">{feat.title}</h3>
+                      </div>
+                      <p className="text-slate-400 text-xs leading-relaxed">{feat.desc}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )
+            })}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Partners */}
+      <section className="py-16 bg-[#0D1B2E]/30">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="text-center mb-10"
+          >
+            <motion.h2 variants={fadeUp} custom={0} className="text-2xl sm:text-3xl font-bold mb-4">
+              Our Partners
+            </motion.h2>
+            <motion.p variants={fadeUp} custom={1} className="text-slate-400 max-w-xl mx-auto">
+              Connected to the world&apos;s leading brokers and financial platforms.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"
+          >
+            {partners.map((partner) => (
+              <Card key={partner} className="bg-[#162D50] border-white/[0.06] card-hover rounded-xl">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 rounded-lg bg-white/[0.06] flex items-center justify-center mx-auto mb-2">
+                    <span className="text-xs font-bold text-slate-400">{partner.charAt(0)}</span>
+                  </div>
+                  <p className="text-xs font-medium text-slate-400">{partner}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-16">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="relative rounded-3xl overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-[#00D4AA]/20 to-[#00D4AA]/5" />
+            <div className="absolute inset-0 bg-[#162D50]/80" />
+            <div className="relative z-10 py-12 sm:py-16 px-6 sm:px-12 text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+                Ready to Start Trading?
+              </h2>
+              <p className="text-slate-400 max-w-lg mx-auto mb-6">
+                Join thousands of traders who are already trading across brokers on DWEX.
               </p>
+              <Link href="/signup">
+                <Button
+                  size="lg"
+                  className="bg-[#00D4AA] hover:bg-[#00A888] text-[#0A1628] font-bold text-base px-8 py-6 rounded-xl glow-dwex-strong"
+                >
+                  Create Free Account
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
             </div>
-          </div>
-
-          {/* Vision */}
-          <div className="about-block about-animate">
-            <div className="about-block-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feature-svg">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-            </div>
-            <div className="about-block-content">
-              <h2 className="about-block-title">Our Vision</h2>
-              <p className="about-block-text">
-                Our vision is to become a leading Islamic educational institution recognized for producing
-                graduates who excel in both religious and secular fields. We aspire to create a learning
-                environment where students develop a deep love for the Quran, a strong sense of identity,
-                and the academic competence to thrive in an ever-changing world. Aroyan envisions a future
-                where every student carries forward the light of knowledge and faith, contributing
-                positively to society and upholding the values of integrity, respect, and excellence.
-              </p>
-            </div>
-          </div>
-
-          {/* Islamic Values */}
-          <div className="about-block about-animate">
-            <div className="about-block-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feature-svg">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
-            </div>
-            <div className="about-block-content">
-              <h2 className="about-block-title">Our Islamic Values</h2>
-              <p className="about-block-text">
-                At the core of Aroyan Muslim School are the timeless Islamic values that guide every
-                aspect of our educational approach. We emphasize Taqwa (God-consciousness), Ikhlas
-                (sincerity), Adab (good manners), and Ihsan (excellence in all endeavors). Our students
-                learn to approach every task with dedication and seek knowledge as an act of worship.
-                We foster an atmosphere of brotherhood, compassion, and mutual respect, where students
-                are encouraged to support one another and grow together as a community of learners.
-              </p>
-            </div>
-          </div>
-
-          {/* Programs */}
-          <div className="about-block about-animate">
-            <div className="about-block-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feature-svg">
-                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-              </svg>
-            </div>
-            <div className="about-block-content">
-              <h2 className="about-block-title">Our Programs</h2>
-              <p className="about-block-text">
-                Aroyan Muslim School offers a range of programs designed to meet the diverse needs of
-                our students and their families. Our flagship Hifz program provides a structured pathway
-                for complete Quran memorization under the guidance of certified scholars. The Saturday
-                and Sunday Madrasah programs offer flexible weekend Islamic education for students
-                attending conventional schools during the week. Additionally, our full-time academic
-                program delivers a comprehensive Western curriculum alongside Islamic studies, ensuring
-                that every student receives a well-rounded education that prepares them for future success.
-              </p>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* ==================== D3 - Footer ==================== */}
-      <Footer />
-    </>
+          </motion.div>
+        </div>
+      </section>
+    </div>
   )
 }

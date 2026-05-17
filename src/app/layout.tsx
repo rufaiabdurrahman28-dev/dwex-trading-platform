@@ -1,14 +1,27 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ConditionalLayout } from "@/components/shared/ConditionalLayout";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
-  title: "9mach Trade — Trade Smart, Trade Global",
-  description: "The most powerful trading platform for Forex, Stocks, Crypto & more. Deposit in Naira ₦, trade globally. 1,500+ assets, live charts, Nigerian wallet.",
-  keywords: ["9mach Trade", "Forex", "Stocks", "Crypto", "Trading", "Nigeria", "Naira"],
-  authors: [{ name: "9mach Trade" }],
+  title: "DWEX — Trade Across Brokers, One Platform",
+  description:
+    "DWEX is a broker aggregator platform. Trade 1,500+ assets across 20+ brokers. Deposit in Naira ₦, trade globally. Forex, Stocks, Crypto, Commodities, Indices & ETFs.",
+  keywords: [
+    "DWEX",
+    "Broker Aggregator",
+    "Forex",
+    "Stocks",
+    "Crypto",
+    "Trading",
+    "Nigeria",
+    "Naira",
+  ],
+  authors: [{ name: "DWEX" }],
   openGraph: {
-    title: "9mach Trade — Trade Smart, Trade Global",
-    description: "1,500+ assets. Live charts. Nigerian wallet. Start trading today.",
+    title: "DWEX — Trade Across Brokers, One Platform",
+    description:
+      "1,500+ assets. 20+ brokers. Live charts. Nigerian wallet. Start trading today.",
     type: "website",
   },
 };
@@ -20,8 +33,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body className="antialiased bg-[#0a0a0f] text-white">
-        {children}
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="antialiased bg-[#0A1628] text-white min-h-screen flex flex-col">
+        <ConditionalLayout>{children}</ConditionalLayout>
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   );

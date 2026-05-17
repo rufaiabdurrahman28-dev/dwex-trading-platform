@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useParams } from 'next/navigation'
+import Link from 'next/link'
 import {
   Search,
   ChevronDown,
@@ -9,9 +9,7 @@ import {
   TrendingDown,
   X,
   Settings2,
-  ArrowLeft,
 } from 'lucide-react'
-import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -27,24 +25,17 @@ import {
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 
-/* ── Mock asset data map ── */
-const assetMap: Record<string, { name: string; price: number; change: number; category: string }> = {
-  'EUR/USD': { name: 'Euro / US Dollar', price: 1.0842, change: -0.12, category: 'Forex' },
-  'GBP/USD': { name: 'British Pound / US Dollar', price: 1.2654, change: 0.08, category: 'Forex' },
-  'USD/JPY': { name: 'US Dollar / Japanese Yen', price: 154.32, change: -0.34, category: 'Forex' },
-  'BTC/USD': { name: 'Bitcoin / US Dollar', price: 67245.30, change: 2.14, category: 'Crypto' },
-  'ETH/USD': { name: 'Ethereum / US Dollar', price: 3521.80, change: 1.87, category: 'Crypto' },
-  'SOL/USD': { name: 'Solana / US Dollar', price: 172.30, change: 3.42, category: 'Crypto' },
-  'XAU/USD': { name: 'Gold / US Dollar', price: 2341.50, change: 0.45, category: 'Commodities' },
-  'AAPL': { name: 'Apple Inc.', price: 189.72, change: 1.23, category: 'Stocks' },
-  'TSLA': { name: 'Tesla Inc.', price: 248.50, change: -0.87, category: 'Stocks' },
-  'GOOGL': { name: 'Alphabet Inc.', price: 176.42, change: 0.65, category: 'Stocks' },
-  'NVDA': { name: 'NVIDIA Corp.', price: 875.28, change: 2.34, category: 'Stocks' },
-  'SPX500': { name: 'S&P 500 Index', price: 5278.40, change: 0.56, category: 'Indices' },
-  'NAS100': { name: 'NASDAQ 100 Index', price: 18452.30, change: 0.78, category: 'Indices' },
-}
-
-const popularAssets = Object.entries(assetMap).map(([symbol, data]) => ({ symbol, ...data }))
+/* ── Mock Data ── */
+const popularAssets = [
+  { symbol: 'EUR/USD', price: 1.0842, change: -0.12 },
+  { symbol: 'GBP/USD', price: 1.2654, change: 0.08 },
+  { symbol: 'BTC/USD', price: 67245.30, change: 2.14 },
+  { symbol: 'XAU/USD', price: 2341.50, change: 0.45 },
+  { symbol: 'AAPL', price: 189.72, change: 1.23 },
+  { symbol: 'SPX500', price: 5278.40, change: 0.56 },
+  { symbol: 'ETH/USD', price: 3521.80, change: 1.87 },
+  { symbol: 'TSLA', price: 248.50, change: -0.87 },
+]
 
 const openPositions = [
   { id: 1, symbol: 'BTC/USD', type: 'Buy' as const, size: 0.05, entry: 66800.00, current: 67245.30, pnl: 22.27, pnlPct: 0.67, phase: 'Deriv Phase' },
@@ -67,15 +58,12 @@ const closedTrades = [
 const timeframes = ['1m', '5m', '15m', '1H', '4H', '1D', '1W']
 const leverageOptions = [1, 5, 10, 25, 50, 100]
 
-export default function SymbolTradePage() {
-  const params = useParams()
-  const symbol = decodeURIComponent(params.symbol as string)
-  const assetData = assetMap[symbol] || { name: symbol, price: 0, change: 0, category: 'Unknown' }
-
+export default function TradePage() {
+  const [selectedAsset, setSelectedAsset] = useState(popularAssets[0])
   const [orderSide, setOrderSide] = useState<'buy' | 'sell'>('buy')
   const [orderType, setOrderType] = useState<'market' | 'limit' | 'stop'>('market')
   const [amount, setAmount] = useState('')
-  const [leverage, setLeverage] = useState([2])
+  const [leverage, setLeverage] = useState([10])
   const [stopLoss, setStopLoss] = useState('')
   const [takeProfit, setTakeProfit] = useState('')
   const [phase, setPhase] = useState('Deriv Phase')
@@ -96,12 +84,6 @@ export default function SymbolTradePage() {
         {/* ── Left Panel: Asset Info ── */}
         <div className="lg:w-64 xl:w-72 border-r border-white/[0.06] bg-[#0D1B2E]/50 flex-shrink-0 overflow-hidden">
           <div className="p-4">
-            {/* Back button */}
-            <Link href="/trade" className="flex items-center gap-1 text-xs text-slate-400 hover:text-white mb-3 transition">
-              <ArrowLeft className="w-3.5 h-3.5" />
-              All Assets
-            </Link>
-
             {/* Asset selector */}
             <div className="relative mb-4">
               <button
@@ -109,8 +91,10 @@ export default function SymbolTradePage() {
                 className="w-full flex items-center justify-between p-3 rounded-lg bg-white/[0.06] border border-white/[0.08] hover:border-white/[0.12] transition"
               >
                 <div>
-                  <span className="font-bold text-sm">{symbol}</span>
-                  <span className="text-xs text-slate-500 ml-2">{assetData.category}</span>
+                  <span className="font-bold text-sm">{selectedAsset.symbol}</span>
+                  <span className="text-xs text-slate-500 ml-2">{
+                    popularAssets.find(a => a.symbol === selectedAsset.symbol)?.symbol.includes('/') ? 'Forex' : 'Stock'
+                  }</span>
                 </div>
                 <ChevronDown className={cn('w-4 h-4 text-slate-400 transition-transform', showAssetList && 'rotate-180')} />
               </button>
@@ -128,19 +112,19 @@ export default function SymbolTradePage() {
                     </div>
                   </div>
                   {filteredAssets.map((asset) => (
-                    <Link key={asset.symbol} href={`/trade/${encodeURIComponent(asset.symbol)}`}>
-                      <button
-                        className={cn(
-                          'w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-white/[0.06] transition',
-                          symbol === asset.symbol && 'bg-[#00D4AA]/10'
-                        )}
-                      >
-                        <span className="font-medium">{asset.symbol}</span>
-                        <span className={cn('font-mono text-xs', asset.change >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]')}>
-                          {asset.change >= 0 ? '+' : ''}{asset.change}%
-                        </span>
-                      </button>
-                    </Link>
+                    <button
+                      key={asset.symbol}
+                      onClick={() => { setSelectedAsset(asset); setShowAssetList(false); setAssetSearch('') }}
+                      className={cn(
+                        'w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-white/[0.06] transition',
+                        selectedAsset.symbol === asset.symbol && 'bg-[#00D4AA]/10'
+                      )}
+                    >
+                      <span className="font-medium">{asset.symbol}</span>
+                      <span className={cn('font-mono text-xs', asset.change >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]')}>
+                        {asset.change >= 0 ? '+' : ''}{asset.change}%
+                      </span>
+                    </button>
                   ))}
                 </div>
               )}
@@ -151,22 +135,21 @@ export default function SymbolTradePage() {
               <p className="text-xs text-slate-500 mb-1">Current Price</p>
               <p className={cn(
                 'text-2xl font-bold font-mono',
-                assetData.change >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]'
+                selectedAsset.change >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]'
               )}>
-                {assetData.price >= 1000
-                  ? assetData.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                  : assetData.price.toFixed(assetData.price < 1 ? 4 : 2)}
+                {selectedAsset.price >= 1000
+                  ? selectedAsset.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                  : selectedAsset.price.toFixed(selectedAsset.price < 1 ? 4 : 2)}
               </p>
               <div className="flex items-center gap-2 mt-1">
-                {assetData.change >= 0 ? (
+                {selectedAsset.change >= 0 ? (
                   <TrendingUp className="w-4 h-4 text-[#00D4AA]" />
                 ) : (
                   <TrendingDown className="w-4 h-4 text-[#FF4D6A]" />
                 )}
-                <span className={cn('text-sm font-mono font-medium', assetData.change >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]')}>
-                  {assetData.change >= 0 ? '+' : ''}{assetData.change}%
+                <span className={cn('text-sm font-mono font-medium', selectedAsset.change >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]')}>
+                  {selectedAsset.change >= 0 ? '+' : ''}{selectedAsset.change}%
                 </span>
-                <span className="text-xs text-slate-500">24h</span>
               </div>
             </div>
 
@@ -175,13 +158,13 @@ export default function SymbolTradePage() {
               <div className="p-2 rounded-lg bg-[#00D4AA]/5 border border-[#00D4AA]/10">
                 <p className="text-[10px] text-slate-500">BID</p>
                 <p className="font-mono font-semibold text-sm text-[#00D4AA]">
-                  {(assetData.price - (assetData.price * 0.0002)).toFixed(assetData.price < 1 ? 4 : 2)}
+                  {(selectedAsset.price - 0.0002).toFixed(selectedAsset.price < 1 ? 4 : 2)}
                 </p>
               </div>
               <div className="p-2 rounded-lg bg-[#FF4D6A]/5 border border-[#FF4D6A]/10">
                 <p className="text-[10px] text-slate-500">ASK</p>
                 <p className="font-mono font-semibold text-sm text-[#FF4D6A]">
-                  {(assetData.price + (assetData.price * 0.0002)).toFixed(assetData.price < 1 ? 4 : 2)}
+                  {(selectedAsset.price + 0.0002).toFixed(selectedAsset.price < 1 ? 4 : 2)}
                 </p>
               </div>
             </div>
@@ -196,19 +179,19 @@ export default function SymbolTradePage() {
             <div className="space-y-1">
               <p className="text-xs text-slate-500 mb-2">Popular</p>
               {popularAssets.slice(0, 5).map((asset) => (
-                <Link key={asset.symbol} href={`/trade/${encodeURIComponent(asset.symbol)}`}>
-                  <button
-                    className={cn(
-                      'w-full flex items-center justify-between px-2 py-1.5 rounded text-xs hover:bg-white/[0.04] transition',
-                      symbol === asset.symbol && 'bg-[#00D4AA]/10'
-                    )}
-                  >
-                    <span className="font-medium">{asset.symbol}</span>
-                    <span className={cn('font-mono', asset.change >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]')}>
-                      {asset.change >= 0 ? '+' : ''}{asset.change}%
-                    </span>
-                  </button>
-                </Link>
+                <button
+                  key={asset.symbol}
+                  onClick={() => setSelectedAsset(asset)}
+                  className={cn(
+                    'w-full flex items-center justify-between px-2 py-1.5 rounded text-xs hover:bg-white/[0.04] transition',
+                    selectedAsset.symbol === asset.symbol && 'bg-[#00D4AA]/10'
+                  )}
+                >
+                  <span className="font-medium">{asset.symbol}</span>
+                  <span className={cn('font-mono', asset.change >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]')}>
+                    {asset.change >= 0 ? '+' : ''}{asset.change}%
+                  </span>
+                </button>
               ))}
             </div>
           </div>
@@ -219,18 +202,20 @@ export default function SymbolTradePage() {
           {/* Chart header */}
           <div className="flex items-center justify-between px-4 py-2 border-b border-white/[0.06] bg-[#0D1B2E]/30">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-sm">{symbol}</span>
-              <span className="text-xs text-slate-500">{assetData.name}</span>
+              <span className="font-bold text-sm">{selectedAsset.symbol}</span>
               <Badge variant="outline" className={cn(
                 'text-[10px] px-1.5 border-0',
-                assetData.change >= 0 ? 'bg-[#00D4AA]/10 text-[#00D4AA]' : 'bg-[#FF4D6A]/10 text-[#FF4D6A]'
+                selectedAsset.change >= 0 ? 'bg-[#00D4AA]/10 text-[#00D4AA]' : 'bg-[#FF4D6A]/10 text-[#FF4D6A]'
               )}>
-                {assetData.change >= 0 ? '+' : ''}{assetData.change}%
+                {selectedAsset.change >= 0 ? '+' : ''}{selectedAsset.change}%
               </Badge>
             </div>
             <div className="flex items-center gap-1">
               {timeframes.map((tf) => (
-                <button key={tf} className="px-2 py-1 rounded text-xs font-medium text-slate-400 hover:text-white hover:bg-white/[0.06] transition">
+                <button
+                  key={tf}
+                  className="px-2 py-1 rounded text-xs font-medium text-slate-400 hover:text-white hover:bg-white/[0.06] transition"
+                >
                   {tf}
                 </button>
               ))}
@@ -243,6 +228,7 @@ export default function SymbolTradePage() {
           {/* Chart placeholder */}
           <div className="flex-1 relative bg-gradient-to-b from-[#0D1B2E]/80 to-[#0A1628] flex items-center justify-center min-h-[300px]">
             <div className="absolute inset-0 opacity-5">
+              {/* Grid lines */}
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={`h-${i}`} className="absolute w-full border-t border-white/10" style={{ top: `${(i + 1) * 12.5}%` }} />
               ))}
@@ -250,19 +236,20 @@ export default function SymbolTradePage() {
                 <div key={`v-${i}`} className="absolute h-full border-l border-white/10" style={{ left: `${(i + 1) * 10}%` }} />
               ))}
             </div>
+            {/* Simulated candlestick pattern */}
             <svg className="absolute inset-0 w-full h-full opacity-20" preserveAspectRatio="none" viewBox="0 0 1000 400">
               <defs>
-                <linearGradient id="chartGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor={assetData.change >= 0 ? '#00D4AA' : '#FF4D6A'} stopOpacity="0.3" />
-                  <stop offset="100%" stopColor={assetData.change >= 0 ? '#00D4AA' : '#FF4D6A'} stopOpacity="0" />
+                <linearGradient id="chartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#00D4AA" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="#00D4AA" stopOpacity="0" />
                 </linearGradient>
               </defs>
-              <path d="M0,300 L50,280 L100,290 L150,250 L200,260 L250,220 L300,230 L350,200 L400,210 L450,180 L500,190 L550,160 L600,170 L650,140 L700,150 L750,120 L800,130 L850,100 L900,110 L950,80 L1000,90" stroke={assetData.change >= 0 ? '#00D4AA' : '#FF4D6A'} strokeWidth="2" fill="none" />
-              <path d="M0,300 L50,280 L100,290 L150,250 L200,260 L250,220 L300,230 L350,200 L400,210 L450,180 L500,190 L550,160 L600,170 L650,140 L700,150 L750,120 L800,130 L850,100 L900,110 L950,80 L1000,90 L1000,400 L0,400 Z" fill="url(#chartGrad2)" />
+              <path d="M0,300 L50,280 L100,290 L150,250 L200,260 L250,220 L300,230 L350,200 L400,210 L450,180 L500,190 L550,160 L600,170 L650,140 L700,150 L750,120 L800,130 L850,100 L900,110 L950,80 L1000,90" stroke="#00D4AA" strokeWidth="2" fill="none" />
+              <path d="M0,300 L50,280 L100,290 L150,250 L200,260 L250,220 L300,230 L350,200 L400,210 L450,180 L500,190 L550,160 L600,170 L650,140 L700,150 L750,120 L800,130 L850,100 L900,110 L950,80 L1000,90 L1000,400 L0,400 Z" fill="url(#chartGrad)" />
             </svg>
             <div className="relative z-10 text-center">
-              <p className="text-slate-400 text-sm">{symbol} Chart</p>
-              <p className="text-slate-500 text-xs mt-1">Real-time chart will load here</p>
+              <p className="text-slate-400 text-sm">TradingView Chart</p>
+              <p className="text-slate-500 text-xs mt-1">Chart will load here with real-time data</p>
             </div>
           </div>
 
@@ -272,13 +259,16 @@ export default function SymbolTradePage() {
               <div className="flex items-center border-b border-white/[0.06] px-4">
                 <TabsList className="bg-transparent h-9 p-0">
                   <TabsTrigger value="positions" className="text-xs h-9 px-3 data-[state=active]:bg-transparent data-[state=active]:text-[#00D4AA] data-[state=active]:border-b-2 data-[state=active]:border-[#00D4AA] rounded-none">
-                    Open ({openPositions.length})
+                    Open Positions ({openPositions.length})
                   </TabsTrigger>
                   <TabsTrigger value="pending" className="text-xs h-9 px-3 data-[state=active]:bg-transparent data-[state=active]:text-[#00D4AA] data-[state=active]:border-b-2 data-[state=active]:border-[#00D4AA] rounded-none">
                     Pending ({pendingOrders.length})
                   </TabsTrigger>
                   <TabsTrigger value="closed" className="text-xs h-9 px-3 data-[state=active]:bg-transparent data-[state=active]:text-[#00D4AA] data-[state=active]:border-b-2 data-[state=active]:border-[#00D4AA] rounded-none">
                     Closed ({closedTrades.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="history" className="text-xs h-9 px-3 data-[state=active]:bg-transparent data-[state=active]:text-[#00D4AA] data-[state=active]:border-b-2 data-[state=active]:border-[#00D4AA] rounded-none">
+                    History
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -338,7 +328,9 @@ export default function SymbolTradePage() {
                       <tr key={order.id} className="border-b border-white/[0.04] hover:bg-white/[0.02]">
                         <td className="py-2 px-4 font-medium">{order.symbol}</td>
                         <td className="py-2 px-2">
-                          <Badge variant="outline" className="text-[10px] px-1.5 border-0 bg-[#F5A623]/10 text-[#F5A623]">{order.type}</Badge>
+                          <Badge variant="outline" className="text-[10px] px-1.5 border-0 bg-[#F5A623]/10 text-[#F5A623]">
+                            {order.type}
+                          </Badge>
                         </td>
                         <td className="py-2 px-2 text-right font-mono">{order.price.toFixed(2)}</td>
                         <td className="py-2 px-2 text-right font-mono">{order.size}</td>
@@ -360,6 +352,8 @@ export default function SymbolTradePage() {
                       <th className="text-left py-2 px-4 font-medium">Symbol</th>
                       <th className="text-left py-2 px-2 font-medium">Type</th>
                       <th className="text-right py-2 px-2 font-medium">Size</th>
+                      <th className="text-right py-2 px-2 font-medium">Entry</th>
+                      <th className="text-right py-2 px-2 font-medium">Exit</th>
                       <th className="text-right py-2 px-2 font-medium">P&L</th>
                       <th className="text-right py-2 px-4 font-medium">Date</th>
                     </tr>
@@ -374,6 +368,8 @@ export default function SymbolTradePage() {
                           </Badge>
                         </td>
                         <td className="py-2 px-2 text-right font-mono">{trade.size}</td>
+                        <td className="py-2 px-2 text-right font-mono">{trade.entry.toFixed(trade.entry < 1 ? 4 : 2)}</td>
+                        <td className="py-2 px-2 text-right font-mono">{trade.exit.toFixed(trade.exit < 1 ? 4 : 2)}</td>
                         <td className={cn('py-2 px-2 text-right font-mono font-medium', trade.pnl >= 0 ? 'text-[#00D4AA]' : 'text-[#FF4D6A]')}>
                           {trade.pnl >= 0 ? '+' : ''}{trade.pnl.toFixed(2)}
                         </td>
@@ -382,6 +378,10 @@ export default function SymbolTradePage() {
                     ))}
                   </tbody>
                 </table>
+              </TabsContent>
+
+              <TabsContent value="history" className="mt-0 p-4 text-center text-slate-500 text-xs">
+                Full trade history will appear here
               </TabsContent>
             </Tabs>
           </div>
@@ -411,7 +411,9 @@ export default function SymbolTradePage() {
                 onClick={() => setOrderSide('buy')}
                 className={cn(
                   'py-3 rounded-lg font-bold text-sm transition-all',
-                  orderSide === 'buy' ? 'bg-[#00D4AA] text-[#0A1628] glow-dwex' : 'bg-[#00D4AA]/10 text-[#00D4AA] hover:bg-[#00D4AA]/20'
+                  orderSide === 'buy'
+                    ? 'bg-[#00D4AA] text-[#0A1628] glow-dwex'
+                    : 'bg-[#00D4AA]/10 text-[#00D4AA] hover:bg-[#00D4AA]/20'
                 )}
               >
                 Buy
@@ -420,7 +422,9 @@ export default function SymbolTradePage() {
                 onClick={() => setOrderSide('sell')}
                 className={cn(
                   'py-3 rounded-lg font-bold text-sm transition-all',
-                  orderSide === 'sell' ? 'bg-[#FF4D6A] text-white glow-dwex' : 'bg-[#FF4D6A]/10 text-[#FF4D6A] hover:bg-[#FF4D6A]/20'
+                  orderSide === 'sell'
+                    ? 'bg-[#FF4D6A] text-white glow-dwex'
+                    : 'bg-[#FF4D6A]/10 text-[#FF4D6A] hover:bg-[#FF4D6A]/20'
                 )}
               >
                 Sell
@@ -437,7 +441,9 @@ export default function SymbolTradePage() {
                     onClick={() => setOrderType(type)}
                     className={cn(
                       'py-2 rounded-lg text-xs font-medium transition capitalize',
-                      orderType === type ? 'bg-white/[0.12] text-white' : 'bg-white/[0.04] text-slate-400 hover:text-white hover:bg-white/[0.06]'
+                      orderType === type
+                        ? 'bg-white/[0.12] text-white'
+                        : 'bg-white/[0.04] text-slate-400 hover:text-white hover:bg-white/[0.06]'
                     )}
                   >
                     {type}
@@ -450,7 +456,13 @@ export default function SymbolTradePage() {
             <div>
               <label className="text-xs text-slate-500 mb-1.5 block">Amount (USD)</label>
               <div className="relative">
-                <Input type="number" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} className="bg-white/[0.06] border-white/[0.08] text-white font-mono pr-12" />
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="bg-white/[0.06] border-white/[0.08] text-white font-mono pr-12"
+                />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">USD</span>
               </div>
             </div>
@@ -461,10 +473,23 @@ export default function SymbolTradePage() {
                 <label className="text-xs text-slate-500">Leverage</label>
                 <span className="text-xs font-mono font-bold text-[#00D4AA]">{leveragVal}x</span>
               </div>
-              <Slider value={leverage} onValueChange={setLeverage} max={5} step={1} className="py-2" />
+              <Slider
+                value={leverage}
+                onValueChange={setLeverage}
+                max={5}
+                step={1}
+                className="py-2"
+              />
               <div className="flex justify-between mt-1">
                 {leverageOptions.map((l) => (
-                  <button key={l} onClick={() => setLeverage([leverageOptions.indexOf(l)])} className={cn('text-[10px] font-mono px-1.5 py-0.5 rounded', leveragVal === l ? 'text-[#00D4AA] bg-[#00D4AA]/10' : 'text-slate-500')}>
+                  <button
+                    key={l}
+                    onClick={() => setLeverage([leverageOptions.indexOf(l)])}
+                    className={cn(
+                      'text-[10px] font-mono px-1.5 py-0.5 rounded',
+                      leveragVal === l ? 'text-[#00D4AA] bg-[#00D4AA]/10' : 'text-slate-500'
+                    )}
+                  >
                     {l}x
                   </button>
                 ))}
@@ -475,11 +500,23 @@ export default function SymbolTradePage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-slate-500 mb-1.5 block">Stop Loss</label>
-                <Input type="number" placeholder="0.00" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} className="bg-white/[0.06] border-white/[0.08] text-white font-mono text-sm" />
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  value={stopLoss}
+                  onChange={(e) => setStopLoss(e.target.value)}
+                  className="bg-white/[0.06] border-white/[0.08] text-white font-mono text-sm"
+                />
               </div>
               <div>
                 <label className="text-xs text-slate-500 mb-1.5 block">Take Profit</label>
-                <Input type="number" placeholder="0.00" value={takeProfit} onChange={(e) => setTakeProfit(e.target.value)} className="bg-white/[0.06] border-white/[0.08] text-white font-mono text-sm" />
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  value={takeProfit}
+                  onChange={(e) => setTakeProfit(e.target.value)}
+                  className="bg-white/[0.06] border-white/[0.08] text-white font-mono text-sm"
+                />
               </div>
             </div>
 
@@ -492,15 +529,31 @@ export default function SymbolTradePage() {
             </Card>
 
             {/* Open Position Button */}
-            <Button className={cn('w-full py-6 text-base font-bold rounded-xl transition-all', orderSide === 'buy' ? 'bg-[#00D4AA] hover:bg-[#00A888] text-[#0A1628] glow-dwex-strong' : 'bg-[#FF4D6A] hover:bg-[#E63E57] text-white')}>
+            <Button
+              className={cn(
+                'w-full py-6 text-base font-bold rounded-xl transition-all',
+                orderSide === 'buy'
+                  ? 'bg-[#00D4AA] hover:bg-[#00A888] text-[#0A1628] glow-dwex-strong'
+                  : 'bg-[#FF4D6A] hover:bg-[#E63E57] text-white'
+              )}
+            >
               {orderSide === 'buy' ? 'Open Buy Position' : 'Open Sell Position'}
             </Button>
 
             {/* Order summary */}
             <div className="space-y-1.5 pt-2 border-t border-white/[0.06]">
-              <div className="flex justify-between text-xs"><span className="text-slate-500">Symbol</span><span className="font-medium">{symbol}</span></div>
-              <div className="flex justify-between text-xs"><span className="text-slate-500">Phase</span><span className="font-medium">{phase}</span></div>
-              <div className="flex justify-between text-xs"><span className="text-slate-500">Type</span><span className="font-medium capitalize">{orderType}</span></div>
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-500">Symbol</span>
+                <span className="font-medium">{selectedAsset.symbol}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-500">Phase</span>
+                <span className="font-medium">{phase}</span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-500">Type</span>
+                <span className="font-medium capitalize">{orderType}</span>
+              </div>
             </div>
           </div>
         </div>

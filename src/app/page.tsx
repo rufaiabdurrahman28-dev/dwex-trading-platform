@@ -1,296 +1,419 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { motion } from 'framer-motion'
+import {
+  TrendingUp,
+  BarChart3,
+  Wallet,
+  Layers,
+  ArrowRightLeft,
+  ShieldCheck,
+  ArrowRight,
+  ChevronRight,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 
-const marketData = [
-  { symbol: 'BTC/USD', price: '67,542.30', change: '+2.34%', up: true },
-  { symbol: 'ETH/USD', price: '3,891.15', change: '+1.87%', up: true },
+/* ── Mock ticker data ── */
+const tickerItems = [
+  { symbol: 'BTC/USD', price: '67,245.30', change: '+2.14%', up: true },
+  { symbol: 'ETH/USD', price: '3,521.80', change: '+1.87%', up: true },
   { symbol: 'EUR/USD', price: '1.0842', change: '-0.12%', up: false },
-  { symbol: 'AAPL', price: '189.72', change: '+0.95%', up: true },
-  { symbol: 'USD/NGN', price: '1,550.00', change: '+0.45%', up: true },
-  { symbol: 'SOL/USD', price: '178.34', change: '+5.21%', up: true },
+  { symbol: 'GBP/USD', price: '1.2654', change: '+0.08%', up: true },
+  { symbol: 'XAU/USD', price: '2,341.50', change: '+0.45%', up: true },
+  { symbol: 'AAPL', price: '189.72', change: '+1.23%', up: true },
+  { symbol: 'TSLA', price: '248.50', change: '-0.87%', up: false },
+  { symbol: 'USD/JPY', price: '154.32', change: '-0.34%', up: false },
+  { symbol: 'S&P 500', price: '5,278.40', change: '+0.56%', up: true },
+  { symbol: 'SOL/USD', price: '172.30', change: '+3.42%', up: true },
 ]
 
+/* ── Broker phases ── */
+const phases = [
+  {
+    name: 'Deriv Phase',
+    description: 'Forex, Synthetics, Crypto',
+    assets: '200+',
+    rawtin: '₦1,650/$',
+    color: '#00D4AA',
+  },
+  {
+    name: 'Wise Phase',
+    description: 'Fiat transfers, Multi-currency',
+    assets: '50+',
+    rawtin: '₦1,620/$',
+    color: '#33DDBB',
+  },
+  {
+    name: 'Eversend Phase',
+    description: 'African currencies, Wallet',
+    assets: '30+',
+    rawtin: '₦1,635/$',
+    color: '#F5A623',
+  },
+]
+
+/* ── Features ── */
 const features = [
-  {
-    icon: '📈',
-    title: '1,500+ Assets',
-    desc: 'Trade Forex, Stocks, Crypto, Commodities, Indices & ETFs from one platform'
-  },
-  {
-    icon: '📊',
-    title: 'Live Charts',
-    desc: 'Professional TradingView charts with real-time price data and technical indicators'
-  },
-  {
-    icon: '💰',
-    title: 'Nigerian Wallet',
-    desc: 'Deposit & withdraw in Naira (₦) via Paystack, bank transfer, USSD & crypto'
-  },
-  {
-    icon: '🔄',
-    title: 'Instant Transfer',
-    desc: 'Send & receive money instantly between 9mach Trade users — zero fees'
-  },
-  {
-    icon: '🔔',
-    title: 'Price Alerts',
-    desc: 'Set custom price alerts on any of 1,500+ assets and never miss an opportunity'
-  },
-  {
-    icon: '🛡️',
-    title: 'Secure & Verified',
-    desc: 'KYC verification, transaction PIN, 2FA and bank-grade security for your funds'
-  },
+  { icon: BarChart3, title: '1500+ Assets', desc: 'Trade forex, stocks, crypto, commodities, indices and ETFs from a single platform.' },
+  { icon: TrendingUp, title: 'Live Charts', desc: 'Real-time price charts with advanced technical indicators and drawing tools.' },
+  { icon: Wallet, title: 'Nigerian Wallet', desc: 'Deposit and withdraw in Naira ₦. Bank transfer, Paystack, USSD, and crypto.' },
+  { icon: Layers, title: 'Broker Aggregator', desc: 'Connect 20+ brokers through a single interface. Trade across them seamlessly.' },
+  { icon: ArrowRightLeft, title: 'Position Transfer', desc: 'Move open positions between brokers without closing and reopening trades.' },
+  { icon: ShieldCheck, title: 'Two-Layer KYC', desc: 'Platform-level and broker-level verification for maximum security and compliance.' },
 ]
 
-export default function Home() {
-  const [isVisible, setIsVisible] = useState(false)
-  const [tickerOffset, setTickerOffset] = useState(0)
+/* ── Stats ── */
+const stats = [
+  { value: '1,500+', label: 'Assets' },
+  { value: '20+', label: 'Brokers' },
+  { value: '50', label: 'Countries' },
+  { value: '10+', label: 'Currencies' },
+]
 
-  useEffect(() => {
-    setIsVisible(true)
-    const interval = setInterval(() => {
-      setTickerOffset(prev => prev - 1)
-    }, 30)
-    return () => clearInterval(interval)
-  }, [])
+/* ── How it works steps ── */
+const steps = [
+  { step: '01', title: 'Create Account', desc: 'Sign up in minutes with just your email and phone number.' },
+  { step: '02', title: 'Connect Broker', desc: 'Link your preferred broker accounts to unlock trading phases.' },
+  { step: '03', title: 'Fund Wallet', desc: 'Deposit Naira ₦ via bank transfer, Paystack, USSD, or crypto.' },
+  { step: '04', title: 'Start Trading', desc: 'Trade 1,500+ assets across all your connected brokers.' },
+]
 
+/* ── Animation variants ── */
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.1, duration: 0.6, ease: 'easeOut' },
+  }),
+}
+
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1 } },
+}
+
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0f]/90 backdrop-blur-md border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center font-bold text-sm">9M</div>
-              <span className="text-xl font-bold">9mach <span className="text-emerald-400">Trade</span></span>
-            </div>
-            <div className="hidden md:flex items-center gap-8">
-              <a href="#markets" className="text-sm text-gray-400 hover:text-white transition">Markets</a>
-              <a href="#features" className="text-sm text-gray-400 hover:text-white transition">Features</a>
-              <a href="#pricing" className="text-sm text-gray-400 hover:text-white transition">Pricing</a>
-              <a href="#about" className="text-sm text-gray-400 hover:text-white transition">About</a>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link href="/login" className="text-sm text-gray-400 hover:text-white transition px-3 py-2">Log In</Link>
-              <Link href="/signup" className="bg-emerald-500 hover:bg-emerald-600 text-black font-semibold text-sm px-5 py-2 rounded-lg transition">Start Trading</Link>
-            </div>
-          </div>
+    <div className="overflow-hidden">
+      {/* ── Hero Section ── */}
+      <section className="relative min-h-[90vh] flex items-center justify-center pt-16">
+        {/* Background glows */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[#00D4AA]/5 rounded-full blur-[120px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#00D4AA]/3 rounded-full blur-[100px]" />
         </div>
-      </nav>
 
-      {/* Price Ticker */}
-      <div className="mt-16 bg-[#111118] border-b border-white/5 overflow-hidden h-10 flex items-center">
-        <div className="flex whitespace-nowrap" style={{ transform: `translateX(${tickerOffset}px)` }}>
-          {[...marketData, ...marketData, ...marketData].map((item, i) => (
-            <span key={i} className="inline-flex items-center gap-2 px-6 text-sm">
-              <span className="text-gray-500">{item.symbol}</span>
-              <span className="font-medium">${item.price}</span>
-              <span className={item.up ? 'text-emerald-400' : 'text-red-400'}>{item.change}</span>
-            </span>
+        <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={stagger}
+            className="max-w-4xl mx-auto"
+          >
+            {/* Badge */}
+            <motion.div variants={fadeUp} custom={0} className="mb-6">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#00D4AA]/10 border border-[#00D4AA]/20 text-[#00D4AA] text-sm font-medium">
+                <span className="w-2 h-2 rounded-full bg-[#00D4AA] animate-pulse-green" />
+                Live Trading Active
+              </span>
+            </motion.div>
+
+            {/* Headline */}
+            <motion.h1
+              variants={fadeUp}
+              custom={1}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.1] tracking-tight mb-6"
+            >
+              Trade Across Brokers,{' '}
+              <span className="text-gradient-dwex">One Platform</span>
+            </motion.h1>
+
+            {/* Subtext */}
+            <motion.p
+              variants={fadeUp}
+              custom={2}
+              className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto mb-10"
+            >
+              Access <span className="text-white font-semibold">1,500+ assets</span> across{' '}
+              <span className="text-white font-semibold">20+ brokers</span>. Deposit in Naira ₦,
+              trade globally. Forex, Stocks, Crypto, Commodities, Indices & ETFs — all in one place.
+            </motion.p>
+
+            {/* CTA Buttons */}
+            <motion.div
+              variants={fadeUp}
+              custom={3}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            >
+              <Link href="/signup">
+                <Button
+                  size="lg"
+                  className="bg-[#00D4AA] hover:bg-[#00A888] text-[#0A1628] font-bold text-base px-8 py-6 rounded-xl glow-dwex-strong transition-all hover:shadow-[#00D4AA]/30"
+                >
+                  Start Trading
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
+              <Link href="/markets">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/[0.12] text-white hover:bg-white/[0.06] font-semibold text-base px-8 py-6 rounded-xl"
+                >
+                  Explore Markets
+                </Button>
+              </Link>
+            </motion.div>
+          </motion.div>
+
+          {/* Logo watermark */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 0.03, scale: 1 }}
+            transition={{ delay: 1, duration: 2 }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+          >
+            <Image src="/dwex-logo.jpg" alt="" width={600} height={600} className="rounded-3xl" />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── Price Ticker ── */}
+      <section className="relative py-4 border-y border-white/[0.06] bg-[#0D1B2E]/50 overflow-hidden">
+        <div className="animate-ticker flex whitespace-nowrap">
+          {[...tickerItems, ...tickerItems].map((item, i) => (
+            <div key={i} className="inline-flex items-center gap-3 px-6">
+              <span className="text-sm font-medium text-slate-300">{item.symbol}</span>
+              <span className="text-sm font-mono font-medium text-white">{item.price}</span>
+              <span className={`text-xs font-mono font-medium ${item.up ? 'text-[#00D4AA]' : 'text-[#FF4D6A]'}`}>
+                {item.change}
+              </span>
+            </div>
           ))}
         </div>
-      </div>
-
-      {/* Hero Section */}
-      <section className="relative pt-20 pb-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/5 via-transparent to-transparent" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <div className={`transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 mb-8">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-emerald-400 text-sm font-medium">Live Trading — 1,500+ Assets</span>
-            </div>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              Trade Smart,<br />
-              <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Trade Global</span>
-            </h1>
-            <p className="text-gray-400 text-lg sm:text-xl max-w-2xl mx-auto mb-10">
-              The most powerful trading platform for Forex, Stocks, Crypto & more. 
-              Deposit in Naira ₦, trade globally. Built for Nigerians, designed for the world.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/signup" className="bg-emerald-500 hover:bg-emerald-600 text-black font-bold text-lg px-8 py-4 rounded-xl transition w-full sm:w-auto">
-                Open Free Account
-              </Link>
-              <a href="#features" className="border border-white/10 hover:border-white/30 text-white font-medium text-lg px-8 py-4 rounded-xl transition w-full sm:w-auto">
-                Explore Features →
-              </a>
-            </div>
-            <div className="mt-12 flex items-center justify-center gap-8 text-sm text-gray-500">
-              <span>✅ No deposit fees</span>
-              <span>✅ Instant execution</span>
-              <span>✅ 24/7 support</span>
-            </div>
-          </div>
-        </div>
       </section>
 
-      {/* Live Market Preview */}
-      <section id="markets" className="py-20 bg-[#0d0d15]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-2">Live Markets</h2>
-          <p className="text-gray-500 text-center mb-12">Real-time prices from global markets</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {marketData.map((item, i) => (
-              <div key={i} className="bg-[#1a1a2e] rounded-xl p-5 border border-white/5 hover:border-emerald-500/30 transition cursor-pointer group">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-semibold text-lg">{item.symbol}</span>
-                  <span className={`text-sm font-medium px-2 py-0.5 rounded ${item.up ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
-                    {item.change}
-                  </span>
-                </div>
-                <div className="text-2xl font-bold mb-2">${item.price}</div>
-                <div className="h-12 flex items-end gap-0.5">
-                  {Array.from({ length: 20 }, (_, j) => {
-                    const height = 15 + Math.random() * 85
-                    const isUp = j > 14 ? item.up : !item.up
-                    return (
-                      <div
-                        key={j}
-                        className={`flex-1 rounded-sm ${isUp ? 'bg-emerald-500/60' : 'bg-red-500/60'}`}
-                        style={{ height: `${height}%` }}
-                      />
-                    )
-                  })}
-                </div>
-              </div>
+      {/* ── Trading Phases ── */}
+      <section className="py-20 sm:py-28">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-100px' }}
+            variants={stagger}
+            className="text-center mb-14"
+          >
+            <motion.h2 variants={fadeUp} custom={0} className="text-3xl sm:text-4xl font-bold mb-4">
+              Trading <span className="text-gradient-dwex">Phases</span>
+            </motion.h2>
+            <motion.p variants={fadeUp} custom={1} className="text-slate-400 text-lg max-w-xl mx-auto">
+              Each connected broker creates a trading phase with unique assets and rates.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-50px' }}
+            variants={stagger}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
+            {phases.map((phase, i) => (
+              <motion.div key={phase.name} variants={fadeUp} custom={i}>
+                <Card className="bg-[#162D50] border-white/[0.06] card-hover rounded-2xl overflow-hidden">
+                  <CardContent className="p-6">
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                      style={{ backgroundColor: `${phase.color}15` }}
+                    >
+                      <Layers className="w-6 h-6" style={{ color: phase.color }} />
+                    </div>
+                    <h3 className="text-xl font-bold mb-1">{phase.name}</h3>
+                    <p className="text-slate-400 text-sm mb-4">{phase.description}</p>
+                    <div className="flex items-center justify-between pt-4 border-t border-white/[0.06]">
+                      <div>
+                        <p className="text-xs text-slate-500">Assets</p>
+                        <p className="text-lg font-bold font-mono">{phase.assets}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-slate-500">RAWTIN Rate</p>
+                        <p className="text-lg font-bold font-mono text-[#00D4AA]">{phase.rawtin}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
-          </div>
-          <div className="text-center mt-8">
-            <Link href="/dashboard" className="text-emerald-400 hover:text-emerald-300 font-medium transition">
-              View All 1,500+ Assets →
-            </Link>
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Features */}
-      <section id="features" className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-2">Everything You Need to Trade</h2>
-          <p className="text-gray-500 text-center mb-12">Professional tools for every trader</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((f, i) => (
-              <div key={i} className="bg-[#1a1a2e] rounded-xl p-6 border border-white/5 hover:border-emerald-500/30 transition group">
-                <div className="text-4xl mb-4">{f.icon}</div>
-                <h3 className="text-xl font-bold mb-2">{f.title}</h3>
-                <p className="text-gray-400">{f.desc}</p>
-              </div>
+      {/* ── Features Grid ── */}
+      <section className="py-20 sm:py-28 bg-[#0D1B2E]/30">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-100px' }}
+            variants={stagger}
+            className="text-center mb-14"
+          >
+            <motion.h2 variants={fadeUp} custom={0} className="text-3xl sm:text-4xl font-bold mb-4">
+              Why <span className="text-gradient-dwex">DWEX</span>?
+            </motion.h2>
+            <motion.p variants={fadeUp} custom={1} className="text-slate-400 text-lg max-w-xl mx-auto">
+              Everything you need to trade globally, built for the Nigerian market.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-50px' }}
+            variants={stagger}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {features.map((feat, i) => {
+              const Icon = feat.icon
+              return (
+                <motion.div key={feat.title} variants={fadeUp} custom={i}>
+                  <Card className="bg-[#162D50] border-white/[0.06] card-hover rounded-2xl h-full">
+                    <CardContent className="p-6">
+                      <div className="w-12 h-12 rounded-xl bg-[#00D4AA]/10 flex items-center justify-center mb-4">
+                        <Icon className="w-6 h-6 text-[#00D4AA]" />
+                      </div>
+                      <h3 className="text-lg font-bold mb-2">{feat.title}</h3>
+                      <p className="text-slate-400 text-sm leading-relaxed">{feat.desc}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )
+            })}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── Stats Bar ── */}
+      <section className="py-16">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={stagger}
+            className="grid grid-cols-2 md:grid-cols-4 gap-6"
+          >
+            {stats.map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                variants={fadeUp}
+                custom={i}
+                className="text-center p-6 rounded-2xl bg-[#162D50] border border-white/[0.06]"
+              >
+                <p className="text-3xl sm:text-4xl font-extrabold font-mono text-[#00D4AA] mb-1">
+                  {stat.value}
+                </p>
+                <p className="text-slate-400 text-sm font-medium">{stat.label}</p>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="py-20 bg-gradient-to-r from-emerald-500/5 to-cyan-500/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-            {[
-              { value: '1,500+', label: 'Tradeable Assets' },
-              { value: '₦0', label: 'Deposit Fees' },
-              { value: '24/7', label: 'Market Support' },
-              { value: '100K+', label: 'Active Traders' },
-            ].map((s, i) => (
-              <div key={i}>
-                <div className="text-3xl sm:text-4xl font-bold text-emerald-400 mb-1">{s.value}</div>
-                <div className="text-gray-500">{s.label}</div>
-              </div>
+      {/* ── How It Works ── */}
+      <section className="py-20 sm:py-28 bg-[#0D1B2E]/30">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-100px' }}
+            variants={stagger}
+            className="text-center mb-14"
+          >
+            <motion.h2 variants={fadeUp} custom={0} className="text-3xl sm:text-4xl font-bold mb-4">
+              How It <span className="text-gradient-dwex">Works</span>
+            </motion.h2>
+            <motion.p variants={fadeUp} custom={1} className="text-slate-400 text-lg max-w-xl mx-auto">
+              Get started in four simple steps.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-50px' }}
+            variants={stagger}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          >
+            {steps.map((step, i) => (
+              <motion.div key={step.step} variants={fadeUp} custom={i} className="relative">
+                <Card className="bg-[#162D50] border-white/[0.06] card-hover rounded-2xl h-full">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-14 h-14 rounded-full bg-[#00D4AA]/10 border border-[#00D4AA]/20 flex items-center justify-center mx-auto mb-4">
+                      <span className="text-xl font-bold font-mono text-[#00D4AA]">{step.step}</span>
+                    </div>
+                    <h3 className="text-lg font-bold mb-2">{step.title}</h3>
+                    <p className="text-slate-400 text-sm">{step.desc}</p>
+                  </CardContent>
+                </Card>
+                {i < steps.length - 1 && (
+                  <div className="hidden lg:flex absolute top-1/2 -right-3 z-10">
+                    <ChevronRight className="w-6 h-6 text-[#00D4AA]/40" />
+                  </div>
+                )}
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="py-20 bg-[#0d0d15]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-2">Simple Pricing</h2>
-          <p className="text-gray-500 text-center mb-12">Start free, upgrade when you&apos;re ready</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {[
-              { name: 'Free', price: '$0', period: 'forever', features: ['20 AI messages/day', '1 project', '1 app hosted', '50MB database', 'Basic charts'], highlight: false },
-              { name: 'Pro', price: '$29.99', period: '/month', features: ['5,000 AI messages/day', 'Unlimited projects', '20 apps hosted', '10GB database', 'Advanced charts', 'Price alerts', 'Priority support'], highlight: true },
-              { name: 'Business', price: '$99.99', period: '/month', features: ['Unlimited everything', 'Unlimited apps', 'Unlimited DB', 'Team access', 'API access', 'White-label', 'Dedicated support'], highlight: false },
-            ].map((plan, i) => (
-              <div key={i} className={`rounded-xl p-6 border ${plan.highlight ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-[#1a1a2e] border-white/5'}`}>
-                {plan.highlight && <div className="text-emerald-400 text-sm font-bold mb-2">⭐ MOST POPULAR</div>}
-                <h3 className="text-xl font-bold mb-1">{plan.name}</h3>
-                <div className="mb-4">
-                  <span className="text-3xl font-bold">{plan.price}</span>
-                  <span className="text-gray-500">{plan.period}</span>
-                </div>
-                <ul className="space-y-2 mb-6">
-                  {plan.features.map((f, j) => (
-                    <li key={j} className="flex items-center gap-2 text-sm text-gray-300">
-                      <span className="text-emerald-400">✓</span> {f}
-                    </li>
-                  ))}
-                </ul>
-                <button className={`w-full py-3 rounded-lg font-semibold transition ${plan.highlight ? 'bg-emerald-500 text-black hover:bg-emerald-600' : 'bg-white/5 text-white hover:bg-white/10'}`}>
-                  Get Started
-                </button>
+      {/* ── CTA Section ── */}
+      <section className="py-20 sm:py-28">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="relative rounded-3xl overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-[#00D4AA]/20 to-[#00D4AA]/5" />
+            <div className="absolute inset-0 bg-[#162D50]/80" />
+            <div className="relative z-10 py-16 sm:py-20 px-6 sm:px-12 text-center">
+              <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+                Ready to Start <span className="text-gradient-dwex">Trading</span>?
+              </h2>
+              <p className="text-slate-400 text-lg max-w-lg mx-auto mb-8">
+                Join thousands of traders who are already trading across brokers on DWEX.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link href="/signup">
+                  <Button
+                    size="lg"
+                    className="bg-[#00D4AA] hover:bg-[#00A888] text-[#0A1628] font-bold text-base px-8 py-6 rounded-xl glow-dwex-strong"
+                  >
+                    Create Free Account
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </Link>
+                <Link href="/support">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white/[0.12] text-white hover:bg-white/[0.06] font-semibold text-base px-8 py-6 rounded-xl"
+                  >
+                    Need Help?
+                  </Button>
+                </Link>
               </div>
-            ))}
-          </div>
+            </div>
+          </motion.div>
         </div>
       </section>
-
-      {/* CTA */}
-      <section className="py-20">
-        <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-4">Ready to Start Trading?</h2>
-          <p className="text-gray-400 text-lg mb-8">Join thousands of traders on 9mach Trade. Deposit in Naira, trade globally.</p>
-          <Link href="/signup" className="inline-block bg-emerald-500 hover:bg-emerald-600 text-black font-bold text-lg px-10 py-4 rounded-xl transition">
-            Create Free Account →
-          </Link>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-[#0d0d15] border-t border-white/5 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-6 h-6 rounded bg-emerald-500 flex items-center justify-center font-bold text-xs text-black">9M</div>
-                <span className="font-bold">9mach Trade</span>
-              </div>
-              <p className="text-gray-500 text-sm">Trade Smart, Trade Global</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-3 text-sm">Markets</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li><a href="#" className="hover:text-white transition">Forex</a></li>
-                <li><a href="#" className="hover:text-white transition">Stocks</a></li>
-                <li><a href="#" className="hover:text-white transition">Crypto</a></li>
-                <li><a href="#" className="hover:text-white transition">Commodities</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-3 text-sm">Company</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li><a href="#" className="hover:text-white transition">About</a></li>
-                <li><a href="#" className="hover:text-white transition">Careers</a></li>
-                <li><a href="#" className="hover:text-white transition">Blog</a></li>
-                <li><a href="#" className="hover:text-white transition">Contact</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-3 text-sm">Legal</h4>
-              <ul className="space-y-2 text-sm text-gray-500">
-                <li><a href="#" className="hover:text-white transition">Terms</a></li>
-                <li><a href="#" className="hover:text-white transition">Privacy</a></li>
-                <li><a href="#" className="hover:text-white transition">Risk Disclosure</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-white/5 pt-6 text-center text-gray-600 text-sm">
-            © 2026 9mach Trade. All rights reserved. Trading involves risk.
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }
