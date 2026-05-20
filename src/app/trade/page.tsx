@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import {
   Search,
@@ -9,6 +9,7 @@ import {
   TrendingDown,
   X,
   Settings2,
+  Loader2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,6 +26,7 @@ import {
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { allAssets, phases, searchAssets, type Asset } from '@/lib/assets'
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 
 const popularAssets = allAssets.slice(0, 20)
 
@@ -49,7 +51,8 @@ const closedTrades = [
 const timeframes = ['1m', '5m', '15m', '1H', '4H', '1D', '1W']
 const leverageOptions = [1, 5, 10, 25, 50, 100]
 
-export default function TradePage() {
+function TradePageContent() {
+  const [mounted, setMounted] = useState(false)
   const [selectedAsset, setSelectedAsset] = useState(popularAssets[0])
   const [orderSide, setOrderSide] = useState<'buy' | 'sell'>('buy')
   const [orderType, setOrderType] = useState<'market' | 'limit' | 'stop'>('market')
@@ -62,9 +65,25 @@ export default function TradePage() {
   const [assetSearch, setAssetSearch] = useState('')
   const [showAssetList, setShowAssetList] = useState(false)
 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Only render after client hydration to avoid mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen pt-16 bg-white flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-[#00A88A]" />
+          <p className="text-gray-400 text-sm">Loading trading terminal...</p>
+        </div>
+      </div>
+    )
+  }
+
   const filteredAssets = assetSearch ? searchAssets(assetSearch).slice(0, 20) : popularAssets
 
-  const leveragVal = leverageOptions[leverage[0]]
+  const leveragVal = leverageOptions[leverage[0]] ?? 1
   const estMargin = amount ? (parseFloat(amount) / leveragVal).toFixed(2) : '0.00'
 
   const formatPrice = (price: number) => {
@@ -73,10 +92,12 @@ export default function TradePage() {
     return price.toFixed(2)
   }
 
+  const activePhases = phases.filter(p => p.status === 'active')
+
   return (
     <div className="min-h-screen pt-16 bg-white">
       <div className="h-[calc(100vh-4rem)] flex flex-col lg:flex-row">
-        {/* ── Left Panel: Asset Info ── */}
+        {/* Left Panel: Asset Info */}
         <div className="lg:w-64 xl:w-72 border-r border-gray-200 bg-gray-50 flex-shrink-0 overflow-hidden">
           <div className="p-4">
             {/* Asset selector */}
@@ -188,7 +209,7 @@ export default function TradePage() {
           </div>
         </div>
 
-        {/* ── Center: Chart Area ── */}
+        {/* Center: Chart Area */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Chart header */}
           <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 bg-white">
@@ -242,7 +263,7 @@ export default function TradePage() {
             </div>
           </div>
 
-          {/* ── Bottom Panel: Positions ── */}
+          {/* Bottom Panel: Positions */}
           <div className="border-t border-gray-200 bg-white max-h-[280px] overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <div className="flex items-center border-b border-gray-200 px-4">
@@ -376,18 +397,18 @@ export default function TradePage() {
           </div>
         </div>
 
-        {/* ── Right Panel: Order Panel ── */}
+        {/* Right Panel: Order Panel */}
         <div className="lg:w-80 xl:w-96 border-l border-gray-200 bg-gray-50 flex-shrink-0 overflow-y-auto">
           <div className="p-4 space-y-4">
             {/* Phase selector */}
             <div>
               <label className="text-xs text-gray-400 mb-1.5 block">Trading Phase</label>
               <Select value={phase} onValueChange={setPhase}>
-                <SelectTrigger className="bg-white border-gray-200 text-gray-900 text-sm">
+                <SelectTrigger className="bg-white border-gray-200 text-gray-900 text-sm w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-gray-200">
-                  {phases.filter(p => p.status === 'active').map((p) => (
+                  {activePhases.map((p) => (
                     <SelectItem key={p.id} value={p.name} className="text-gray-900 focus:bg-gray-50">{p.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -434,7 +455,7 @@ export default function TradePage() {
                         ? 'bg-gray-200 text-gray-900'
                         : 'bg-gray-100 text-gray-400 hover:text-gray-700 hover:bg-gray-200'
                     )}
- >
+                  >
                     {type}
                   </button>
                 ))}
@@ -548,5 +569,24 @@ export default function TradePage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function TradePage() {
+  return (
+    <ErrorBoundary>
+      <Suspense
+        fallback={
+          <div className="min-h-screen pt-16 bg-white flex items-center justify-center">
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="w-8 h-8 animate-spin text-[#00A88A]" />
+              <p className="text-gray-400 text-sm">Loading...</p>
+            </div>
+          </div>
+        }
+      >
+        <TradePageContent />
+      </Suspense>
+    </ErrorBoundary>
   )
 }

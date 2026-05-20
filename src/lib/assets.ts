@@ -45,6 +45,22 @@ export const phases = [
   { id: 'okx', name: 'OKX Phase', color: '#8B5CF6', assetCount: 150, rawtin: '₦1,648/$', status: 'coming', description: 'Crypto, Commodities' },
 ]
 
+// Deterministic seeded PRNG — replaces Math.random() to avoid hydration mismatch
+function createSeededRandom(seed: number) {
+  let s = seed
+  return () => {
+    s = (s * 16807 + 0) % 2147483647
+    return (s - 1) / 2147483646
+  }
+}
+const rand = createSeededRandom(42)
+const rand2 = createSeededRandom(137)
+const rand3 = createSeededRandom(256)
+const rand4 = createSeededRandom(999)
+const rand5 = createSeededRandom(1337)
+const rand6 = createSeededRandom(2048)
+const rand7 = createSeededRandom(3141)
+
 // Helper to generate assets programmatically
 function fx(s: string, n: string, p: number, c: number, ph: AssetPhase[], v?: string): Asset {
   return { symbol: s, name: n, category: 'forex', phases: ph, price: p, change: c, volume: v }
@@ -461,8 +477,8 @@ const moreStockNames = [
   'F','FANG','FARM','FATE','FBHS','FCFS','FCN','FCNCA','FCPT','FDP','FDX','FE','FELE','FET','FF','FFBC','FFIN','FFNW','FGBI','FG',
 ]
 
-const stockPrices: [string, string, number][] = moreStockNames.map(t => [t, `${t} Corp.`, Math.round((5 + Math.random() * 500) * 100) / 100])
-const stockAssets: Asset[] = stockPrices.map(([sym, name, price]) => st(sym, name, price, Math.round((Math.random() * 6 - 3) * 100) / 100, [W, BM, CH], `${Math.round(Math.random() * 50)}M`))
+const stockPrices: [string, string, number][] = moreStockNames.map(t => [t, `${t} Corp.`, Math.round((5 + rand() * 500) * 100) / 100])
+const stockAssets: Asset[] = stockPrices.map(([sym, name, price]) => st(sym, name, price, Math.round((rand2() * 6 - 3) * 100) / 100, [W, BM, CH], `${Math.round(rand3() * 50)}M`))
 
 const stocksData: Asset[] = [
   ...stockList.map(([s, n, p, c, ph]) => st(s, n, p, c, ph)),
@@ -595,7 +611,7 @@ const altcoinNames = [
 
 const cryptoAssets: Asset[] = [
   ...cryptoList.map(([s, n, p, c, ph]) => cr(s, n, p, c, ph)),
-  ...altcoinNames.map(t => cr(`${t}/USD`, `${t} Token`, Math.round((0.001 + Math.random() * 50) * 10000) / 10000, Math.round((Math.random() * 10 - 5) * 100) / 100, [B, KC], `${Math.round(Math.random() * 200)}M`)),
+  ...altcoinNames.map(t => cr(`${t}/USD`, `${t} Token`, Math.round((0.001 + rand4() * 50) * 10000) / 10000, Math.round((rand5() * 10 - 5) * 100) / 100, [B, KC], `${Math.round(rand6() * 200)}M`)),
 ]
 
 // ═══════════════════════════════════════════════════════
@@ -881,7 +897,7 @@ const moreEtfNames = [
 
 const etfAssets: Asset[] = [
   ...etfList.map(([s, n, p, c, ph]) => et(s, n, p, c, ph)),
-  ...moreEtfNames.map(t => et(t, `${t} ETF`, Math.round((10 + Math.random() * 200) * 100) / 100, Math.round((Math.random() * 4 - 2) * 100) / 100, [W, BM, RV], `${Math.round(Math.random() * 500)}M`)),
+  ...moreEtfNames.map(t => et(t, `${t} ETF`, Math.round((10 + rand7() * 200) * 100) / 100, Math.round((rand() * 4 - 2) * 100) / 100, [W, BM, RV], `${Math.round(rand2() * 500)}M`)),
 ]
 
 // ═══════════════════════════════════════════════════════

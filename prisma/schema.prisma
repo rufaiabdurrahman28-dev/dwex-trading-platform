@@ -1,32 +1,111 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// DWEX Trading Platform — Prisma Schema (PostgreSQL / Supabase)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String?
+  avatarUrl     String?
+  role          String    @default("user")
+  kycStatus     String    @default("pending") // pending, submitted, verified, rejected
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  wallets       Wallet[]
+  trades        Trade[]
+  deposits      Deposit[]
+  withdrawals   Withdrawal[]
+  alerts        PriceAlert[]
 }
 
-model Post {
+model Wallet {
   id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
+  userId    String
+  phase     String   // Deriv Phase, Wise Phase, Eversend Phase, etc.
+  currency  String   @default("USD")
+  balance   Float    @default(0)
+  locked    Float    @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, phase, currency])
+}
+
+model Trade {
+  id          String   @id @default(cuid())
+  userId      String
+  symbol      String
+  side        String   // buy, sell
+  type        String   // market, limit, stop
+  status      String   @default("open") // open, closed, cancelled
+  phase       String
+  amount      Float
+  leverage    Int      @default(1)
+  entryPrice  Float
+  exitPrice   Float?
+  stopLoss    Float?
+  takeProfit  Float?
+  pnl         Float?
+  pnlPct      Float?
+  margin      Float?
+  closedAt    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Deposit {
+  id            String   @id @default(cuid())
+  userId        String
+  amount        Float
+  currency      String   @default("NGN")
+  convertedAmount Float?  // USD equivalent
+  phase         String
+  status        String   @default("pending") // pending, confirmed, failed
+  paymentRef    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Withdrawal {
+  id            String   @id @default(cuid())
+  userId        String
+  amount        Float
+  currency      String   @default("USD")
+  phase         String
+  status        String   @default("pending") // pending, approved, completed, rejected
+  bankDetails   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PriceAlert {
+  id          String   @id @default(cuid())
+  userId      String
+  symbol      String
+  targetPrice Float
+  direction   String   // above, below
+  isTriggered Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

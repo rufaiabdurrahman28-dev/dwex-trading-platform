@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useParams } from 'next/navigation'
 import {
   Search,
@@ -10,6 +10,7 @@ import {
   X,
   Settings2,
   ArrowLeft,
+  Loader2,
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -27,6 +28,7 @@ import {
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import { allAssets, phases, searchAssets } from '@/lib/assets'
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 
 const openPositions = [
   { id: 1, symbol: 'BTC/USD', type: 'Buy' as const, size: 0.05, entry: 66800.00, current: 67245.30, pnl: 22.27, pnlPct: 0.67, phase: 'Deriv Phase' },
@@ -48,11 +50,27 @@ const closedTrades = [
 
 const timeframes = ['1m', '5m', '15m', '1H', '4H', '1D', '1W']
 const leverageOptions = [1, 5, 10, 25, 50, 100]
-
 const popularAssets = allAssets.slice(0, 20)
 
-export default function SymbolTradePage() {
+function SymbolTradePageContent() {
   const params = useParams()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen pt-16 bg-white flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-[#00A88A]" />
+          <p className="text-gray-400 text-sm">Loading trading terminal...</p>
+        </div>
+      </div>
+    )
+  }
+
   const symbol = decodeURIComponent(params.symbol as string)
   const assetData = allAssets.find(a => a.symbol === symbol) || { name: symbol, price: 0, change: 0, category: 'forex' as const, phases: [] as string[], symbol }
 
@@ -68,9 +86,9 @@ export default function SymbolTradePage() {
   const [showAssetList, setShowAssetList] = useState(false)
 
   const filteredAssets = assetSearch ? searchAssets(assetSearch).slice(0, 20) : popularAssets
-
-  const leveragVal = leverageOptions[leverage[0]]
+  const leveragVal = leverageOptions[leverage[0]] ?? 1
   const estMargin = amount ? (parseFloat(amount) / leveragVal).toFixed(2) : '0.00'
+  const activePhases = phases.filter(p => p.status === 'active')
 
   const formatPrice = (price: number) => {
     if (price >= 1000) return price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -78,10 +96,13 @@ export default function SymbolTradePage() {
     return price.toFixed(2)
   }
 
+  const isPositive = assetData.change >= 0
+  const chartColor = isPositive ? '#00A88A' : '#E63950'
+
   return (
     <div className="min-h-screen pt-16 bg-white">
       <div className="h-[calc(100vh-4rem)] flex flex-col lg:flex-row">
-        {/* ── Left Panel: Asset Info ── */}
+        {/* Left Panel */}
         <div className="lg:w-64 xl:w-72 border-r border-gray-200 bg-gray-50 flex-shrink-0 overflow-hidden">
           <div className="p-4">
             <Link href="/trade" className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-900 mb-3 transition">
@@ -134,16 +155,13 @@ export default function SymbolTradePage() {
 
             <div className="mb-4">
               <p className="text-xs text-gray-400 mb-1">Current Price</p>
-              <p className={cn(
-                'text-2xl font-bold font-mono',
-                assetData.change >= 0 ? 'text-[#00A88A]' : 'text-[#E63950]'
-              )}>
+              <p className={cn('text-2xl font-bold font-mono', isPositive ? 'text-[#00A88A]' : 'text-[#E63950]')}>
                 {formatPrice(assetData.price)}
               </p>
               <div className="flex items-center gap-2 mt-1">
-                {assetData.change >= 0 ? <TrendingUp className="w-4 h-4 text-[#00A88A]" /> : <TrendingDown className="w-4 h-4 text-[#E63950]" />}
-                <span className={cn('text-sm font-mono font-medium', assetData.change >= 0 ? 'text-[#00A88A]' : 'text-[#E63950]')}>
-                  {assetData.change >= 0 ? '+' : ''}{assetData.change}%
+                {isPositive ? <TrendingUp className="w-4 h-4 text-[#00A88A]" /> : <TrendingDown className="w-4 h-4 text-[#E63950]" />}
+                <span className={cn('text-sm font-mono font-medium', isPositive ? 'text-[#00A88A]' : 'text-[#E63950]')}>
+                  {isPositive ? '+' : ''}{assetData.change}%
                 </span>
                 <span className="text-xs text-gray-400">24h</span>
               </div>
@@ -184,7 +202,7 @@ export default function SymbolTradePage() {
           </div>
         </div>
 
-        {/* ── Center: Chart Area ── */}
+        {/* Center: Chart Area */}
         <div className="flex-1 flex flex-col min-w-0">
           <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 bg-white">
             <div className="flex items-center gap-2">
@@ -192,9 +210,9 @@ export default function SymbolTradePage() {
               <span className="text-xs text-gray-400">{assetData.name}</span>
               <Badge variant="outline" className={cn(
                 'text-[10px] px-1.5 border-0',
-                assetData.change >= 0 ? 'bg-[#00A88A]/10 text-[#00A88A]' : 'bg-[#E63950]/10 text-[#E63950]'
+                isPositive ? 'bg-[#00A88A]/10 text-[#00A88A]' : 'bg-[#E63950]/10 text-[#E63950]'
               )}>
-                {assetData.change >= 0 ? '+' : ''}{assetData.change}%
+                {isPositive ? '+' : ''}{assetData.change}%
               </Badge>
             </div>
             <div className="flex items-center gap-1">
@@ -221,11 +239,11 @@ export default function SymbolTradePage() {
             <svg className="absolute inset-0 w-full h-full opacity-20" preserveAspectRatio="none" viewBox="0 0 1000 400">
               <defs>
                 <linearGradient id="chartGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor={assetData.change >= 0 ? '#00A88A' : '#E63950'} stopOpacity="0.3" />
-                  <stop offset="100%" stopColor={assetData.change >= 0 ? '#00A88A' : '#E63950'} stopOpacity="0" />
+                  <stop offset="0%" stopColor={chartColor} stopOpacity="0.3" />
+                  <stop offset="100%" stopColor={chartColor} stopOpacity="0" />
                 </linearGradient>
               </defs>
-              <path d="M0,300 L50,280 L100,290 L150,250 L200,260 L250,220 L300,230 L350,200 L400,210 L450,180 L500,190 L550,160 L600,170 L650,140 L700,150 L750,120 L800,130 L850,100 L900,110 L950,80 L1000,90" stroke={assetData.change >= 0 ? '#00A88A' : '#E63950'} strokeWidth="2" fill="none" />
+              <path d="M0,300 L50,280 L100,290 L150,250 L200,260 L250,220 L300,230 L350,200 L400,210 L450,180 L500,190 L550,160 L600,170 L650,140 L700,150 L750,120 L800,130 L850,100 L900,110 L950,80 L1000,90" stroke={chartColor} strokeWidth="2" fill="none" />
               <path d="M0,300 L50,280 L100,290 L150,250 L200,260 L250,220 L300,230 L350,200 L400,210 L450,180 L500,190 L550,160 L600,170 L650,140 L700,150 L750,120 L800,130 L850,100 L900,110 L950,80 L1000,90 L1000,400 L0,400 Z" fill="url(#chartGrad2)" />
             </svg>
             <div className="relative z-10 text-center">
@@ -323,15 +341,15 @@ export default function SymbolTradePage() {
           </div>
         </div>
 
-        {/* ── Right Panel: Order Panel ── */}
+        {/* Right Panel: Order Panel */}
         <div className="lg:w-80 xl:w-96 border-l border-gray-200 bg-gray-50 flex-shrink-0 overflow-y-auto">
           <div className="p-4 space-y-4">
             <div>
               <label className="text-xs text-gray-400 mb-1.5 block">Trading Phase</label>
               <Select value={phase} onValueChange={setPhase}>
-                <SelectTrigger className="bg-white border-gray-200 text-gray-900 text-sm"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="bg-white border-gray-200 text-gray-900 text-sm w-full"><SelectValue /></SelectTrigger>
                 <SelectContent className="bg-white border-gray-200">
-                  {phases.filter(p => p.status === 'active').map((p) => (
+                  {activePhases.map((p) => (
                     <SelectItem key={p.id} value={p.name} className="text-gray-900 focus:bg-gray-50">{p.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -398,5 +416,24 @@ export default function SymbolTradePage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SymbolTradePage() {
+  return (
+    <ErrorBoundary>
+      <Suspense
+        fallback={
+          <div className="min-h-screen pt-16 bg-white flex items-center justify-center">
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="w-8 h-8 animate-spin text-[#00A88A]" />
+              <p className="text-gray-400 text-sm">Loading...</p>
+            </div>
+          </div>
+        }
+      >
+        <SymbolTradePageContent />
+      </Suspense>
+    </ErrorBoundary>
   )
 }
