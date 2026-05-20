@@ -54,26 +54,8 @@ const popularAssets = allAssets.slice(0, 20)
 
 function SymbolTradePageContent() {
   const params = useParams()
+  // ALL hooks must be called BEFORE any early return (Rules of Hooks)
   const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) {
-    return (
-      <div className="min-h-screen pt-16 bg-white flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-[#00A88A]" />
-          <p className="text-gray-400 text-sm">Loading trading terminal...</p>
-        </div>
-      </div>
-    )
-  }
-
-  const symbol = decodeURIComponent(params.symbol as string)
-  const assetData = allAssets.find(a => a.symbol === symbol) || { name: symbol, price: 0, change: 0, category: 'forex' as const, phases: [] as string[], symbol }
-
   const [orderSide, setOrderSide] = useState<'buy' | 'sell'>('buy')
   const [orderType, setOrderType] = useState<'market' | 'limit' | 'stop'>('market')
   const [amount, setAmount] = useState('')
@@ -84,6 +66,13 @@ function SymbolTradePageContent() {
   const [activeTab, setActiveTab] = useState('positions')
   const [assetSearch, setAssetSearch] = useState('')
   const [showAssetList, setShowAssetList] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const symbol = decodeURIComponent(params.symbol as string)
+  const assetData = allAssets.find(a => a.symbol === symbol) || { name: symbol, price: 0, change: 0, category: 'forex' as const, phases: [] as string[], symbol }
 
   const filteredAssets = assetSearch ? searchAssets(assetSearch).slice(0, 20) : popularAssets
   const leveragVal = leverageOptions[leverage[0]] ?? 1
@@ -98,6 +87,18 @@ function SymbolTradePageContent() {
 
   const isPositive = assetData.change >= 0
   const chartColor = isPositive ? '#00A88A' : '#E63950'
+
+  // Only render after client hydration to avoid mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen pt-16 bg-white flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-[#00A88A]" />
+          <p className="text-gray-400 text-sm">Loading trading terminal...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen pt-16 bg-white">
@@ -306,7 +307,15 @@ function SymbolTradePageContent() {
 
               <TabsContent value="pending" className="mt-0 overflow-y-auto max-h-[220px]">
                 <table className="w-full text-xs">
-                  <thead><tr className="text-gray-400 border-b border-gray-100"><th className="text-left py-2 px-4 font-medium">Symbol</th><th className="text-left py-2 px-2 font-medium">Type</th><th className="text-right py-2 px-2 font-medium">Price</th><th className="text-right py-2 px-2 font-medium">Size</th><th className="text-right py-2 px-4 font-medium">Action</th></tr></thead>
+                  <thead>
+                    <tr className="text-gray-400 border-b border-gray-100">
+                      <th className="text-left py-2 px-4 font-medium">Symbol</th>
+                      <th className="text-left py-2 px-2 font-medium">Type</th>
+                      <th className="text-right py-2 px-2 font-medium">Price</th>
+                      <th className="text-right py-2 px-2 font-medium">Size</th>
+                      <th className="text-right py-2 px-4 font-medium">Action</th>
+                    </tr>
+                  </thead>
                   <tbody>
                     {pendingOrders.map((order) => (
                       <tr key={order.id} className="border-b border-gray-50 hover:bg-gray-50">
@@ -323,7 +332,15 @@ function SymbolTradePageContent() {
 
               <TabsContent value="closed" className="mt-0 overflow-y-auto max-h-[220px]">
                 <table className="w-full text-xs">
-                  <thead><tr className="text-gray-400 border-b border-gray-100"><th className="text-left py-2 px-4 font-medium">Symbol</th><th className="text-left py-2 px-2 font-medium">Type</th><th className="text-right py-2 px-2 font-medium">Size</th><th className="text-right py-2 px-2 font-medium">P&L</th><th className="text-right py-2 px-4 font-medium">Date</th></tr></thead>
+                  <thead>
+                    <tr className="text-gray-400 border-b border-gray-100">
+                      <th className="text-left py-2 px-4 font-medium">Symbol</th>
+                      <th className="text-left py-2 px-2 font-medium">Type</th>
+                      <th className="text-right py-2 px-2 font-medium">Size</th>
+                      <th className="text-right py-2 px-2 font-medium">P&L</th>
+                      <th className="text-right py-2 px-4 font-medium">Date</th>
+                    </tr>
+                  </thead>
                   <tbody>
                     {closedTrades.map((trade) => (
                       <tr key={trade.id} className="border-b border-gray-50 hover:bg-gray-50">
