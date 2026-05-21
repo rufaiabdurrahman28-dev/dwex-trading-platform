@@ -6,6 +6,12 @@ import type { Profile, PortalAccess, Role } from '@/lib/types'
 import { getPortalAccess } from '@/lib/types'
 import type { User, Session } from '@supabase/supabase-js'
 
+// Check if Supabase is properly configured
+const isSupabaseConfigured =
+  typeof window !== 'undefined' &&
+  process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
 interface AuthContextType {
   user: User | null
   profile: Profile | null
@@ -46,7 +52,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         console.error('Error fetching profile:', error)
-        // If profile doesn't exist yet (trigger may not have fired), retry
         if (retryCount < 3) {
           await new Promise(r => setTimeout(r, 1500))
           return fetchProfile(userId, retryCount + 1)
@@ -66,6 +71,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    // If Supabase is not configured, just mark loading as done
+    if (!isSupabaseConfigured) {
+      setLoading(false)
+      return
+    }
+
+    let subscription: { unsubscribe: () => void } | null = null
+
     // Get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
@@ -77,32 +90,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
       setLoading(false)
+    }).catch(() => {
+      setLoading(false)
     })
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
-          setUser(session.user)
-          const prof = await fetchProfile(session.user.id)
-          if (prof) {
-            setProfile(prof)
-            setPortalAccess(getPortalAccess(prof.role))
+    try {
+      const { data } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          if (event === 'SIGNED_IN' && session?.user) {
+            setUser(session.user)
+            const prof = await fetchProfile(session.user.id)
+            if (prof) {
+              setProfile(prof)
+              setPortalAccess(getPortalAccess(prof.role))
+            }
+          } else if (event === 'SIGNED_OUT') {
+            setUser(null)
+            setProfile(null)
+            setPortalAccess(null)
           }
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null)
-          setProfile(null)
-          setPortalAccess(null)
         }
-      }
-    )
+      )
+      subscription = data.subscription
+    } catch (err) {
+      console.warn('[DWEX] Auth state listener failed:', err)
+    }
 
     return () => {
-      subscription.unsubscribe()
+      subscription?.unsubscribe()
     }
   }, [])
 
   async function signIn(email: string, password: string) {
+    if (!isSupabaseConfigured) {
+      return { error: 'Authentication is not configured. Please set up Supabase.' }
+    }
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -119,8 +142,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (prof) {
           setProfile(prof)
           setPortalAccess(getPortalAccess(prof.role))
-        } else {
-          return { error: 'Profile not found. Please contact the school.' }
         }
       }
 
@@ -131,6 +152,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signUp(email: string, password: string, fullName: string, role: Role, section: string) {
+    if (!isSupabaseConfigured) {
+      return { error: 'Authentication is not configured. Please set up Supabase.' }
+    }
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -156,7 +180,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
-    await supabase.auth.signOut()
+    try {
+      await supabase.auth.signOut()
+    } catch (err) {
+      console.warn('[DWEX] Sign out error:', err)
+    }
     setUser(null)
     setProfile(null)
     setPortalAccess(null)
