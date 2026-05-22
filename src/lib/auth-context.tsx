@@ -12,13 +12,16 @@ const isSupabaseConfigured =
   !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
   !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+// Admin secret — if someone uses this as their referral code during signup, they become admin
+const ADMIN_SECRET = process.env.NEXT_PUBLIC_ADMIN_SECRET_KEY || 'DWEX-ADMIN-2024'
+
 interface AuthContextType {
   user: User | null
   profile: Profile | null
   portalAccess: PortalAccess | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
-  signUp: (data: SignUpData) => Promise<{ error: string | null }>
+  signUp: (data: SignUpData) => Promise<{ error: string | null; needsConfirmation?: boolean }>
   signOut: () => Promise<void>
 }
 
@@ -112,15 +115,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function signIn(email: string, password: string) {
     if (!isSupabaseConfigured) {
-      return { error: 'Authentication is not configured.' }
+      return { error: 'Authentication is not configured. Please contact support.' }
     }
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) return { error: error.message }
+      if (error) {
+        // Provide user-friendly error messages
+        if (error.message.includes('Invalid login credentials')) {
+          return { error: 'Invalid email or password. Please check your credentials and try again.' }
+        }
+        if (error.message.includes('Email not confirmed')) {
+          return { error: 'Please confirm your email address first. Check your inbox for a confirmation link.' }
+        }
+        if (error.message.includes('Too many requests')) {
+          return { error: 'Too many login attempts. Please wait a moment and try again.' }
+        }
+        return { error: error.message }
+      }
 
       if (data.user) {
         setUser(data.user)
-        const prof = await fetchProfile(data.user.id)
+
+        // Try to fetch profile; if not found, create it
+        let prof = await fetchProfile(data.user.id)
+        if (!prof) {
+          // Profile doesn't exist yet — create it (might happen if signup callback failed)
+          try {
+            const meta = data.user.user_metadata || {}
+            const role = meta.role || 'trader'
+            await fetch('/api/user/create', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                userId: data.user.id,
+                email: data.user.email,
+                name: meta.full_name || data.user.email!.split('@')[0],
+                phone: meta.phone || '',
+                country: meta.country || '',
+                role,
+              }),
+            })
+            prof = await fetchProfile(data.user.id)
+          } catch (err) {
+            console.error('[DWEX] Auto profile creation on login failed:', err)
+          }
+        }
+
         if (prof) {
           setProfile(prof)
           setPortalAccess(getPortalAccess(prof.role))
@@ -134,9 +174,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function signUp(signUpData: SignUpData) {
     if (!isSupabaseConfigured) {
-      return { error: 'Authentication is not configured.' }
+      return { error: 'Authentication is not configured. Please contact support.' }
     }
     try {
+      // Determine role — admin if referral code matches the admin secret
+      const isAdmin = signUpData.referralCode === ADMIN_SECRET
+      const role = isAdmin ? 'admin' : 'trader'
+
       // 1. Create auth user in Supabase
       const { data, error } = await supabase.auth.signUp({
         email: signUpData.email,
@@ -147,14 +191,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             phone: signUpData.phone || '',
             country: signUpData.country || '',
             referral_code: signUpData.referralCode || '',
+            role, // Store intended role in metadata
           },
-          emailRedirectTo: 'https://my-project-eight-wheat.vercel.app',
+          emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/login` : 'https://my-project-eight-wheat.vercel.app/login',
         },
       })
 
-      if (error) return { error: error.message }
+      if (error) {
+        // Provide user-friendly error messages
+        if (error.message.includes('already registered')) {
+          return { error: 'This email is already registered. Please log in instead.' }
+        }
+        if (error.message.includes('Password')) {
+          return { error: error.message }
+        }
+        return { error: error.message }
+      }
 
-      // 2. Create user profile in our database via API
+      // 2. Check if email confirmation is needed
+      const needsConfirmation = !data.session && data.user && !data.user.email_confirmed_at
+
+      // 3. Create user profile in our database via API
       if (data.user) {
         try {
           const res = await fetch('/api/user/create', {
@@ -166,7 +223,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               name: `${signUpData.firstName} ${signUpData.lastName}`,
               phone: signUpData.phone || '',
               country: signUpData.country || '',
-              role: 'trader',
+              role,
             }),
           })
 
@@ -182,10 +239,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Non-fatal — profile can be created on next login
         }
 
-        setUser(data.user)
+        // Only set user if we have an active session (email confirmed)
+        if (data.session) {
+          setUser(data.user)
+        }
       }
 
-      return { error: null }
+      return { error: null, needsConfirmation: !!needsConfirmation }
     } catch (err: any) {
       return { error: err.message || 'An unexpected error occurred' }
     }

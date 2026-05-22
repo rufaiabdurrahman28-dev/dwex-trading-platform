@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, ChevronLeft, ChevronRight, Check, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, ChevronLeft, ChevronRight, Check, Loader2, MailCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -36,6 +36,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [needsConfirmation, setNeedsConfirmation] = useState(false)
 
   const validateStep1 = () => {
     if (!email.trim()) { setError('Please enter your email address'); return false }
@@ -68,7 +69,7 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      const { error: signUpError } = await signUp({
+      const { error: signUpError, needsConfirmation: needsConf } = await signUp({
         email,
         password,
         firstName,
@@ -83,11 +84,8 @@ export default function SignupPage() {
         return
       }
 
+      setNeedsConfirmation(!!needsConf)
       setSuccess(true)
-      // Redirect to wallet page after short delay
-      setTimeout(() => {
-        router.push('/wallet')
-      }, 2000)
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.')
     } finally {
@@ -95,7 +93,30 @@ export default function SignupPage() {
     }
   }
 
-  // Success state
+  // Success state — email confirmation needed
+  if (success && needsConfirmation) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center max-w-md">
+          <div className="w-20 h-20 rounded-full bg-[#E5940A]/10 flex items-center justify-center mx-auto mb-6">
+            <MailCheck className="w-10 h-10 text-[#E5940A]" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Check Your Email</h1>
+          <p className="text-gray-500 mb-2">We sent a confirmation link to:</p>
+          <p className="font-semibold text-gray-900 mb-4">{email}</p>
+          <p className="text-gray-500 mb-6">Click the link in your email to verify your account, then log in to start trading.</p>
+          <div className="space-y-3">
+            <Button onClick={() => router.push('/login')} className="w-full bg-[#00A88A] hover:bg-[#008F74] text-white font-bold py-6 px-8 rounded-xl">
+              Go to Login
+            </Button>
+            <p className="text-xs text-gray-400">Didn&rsquo;t receive the email? Check your spam folder.</p>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // Success state — auto-confirmed (no email verification needed)
   if (success) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
@@ -183,7 +204,7 @@ export default function SignupPage() {
               {currentStep === 3 && (
                 <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-5">
                   <h2 className="text-lg font-bold text-gray-900">Almost There!</h2>
-                  <div><label className="text-sm text-gray-600 mb-1.5 block">Referral Code <span className="text-gray-400">(Optional)</span></label><Input placeholder="Enter referral code if you have one" value={referralCode} onChange={(e) => setReferralCode(e.target.value)} className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400" /><p className="text-xs text-gray-400 mt-1">No referral code? No problem — leave it blank!</p></div>
+                  <div><label className="text-sm text-gray-600 mb-1.5 block">Referral Code <span className="text-gray-400">(Optional)</span></label><Input placeholder="Enter referral code if you have one" value={referralCode} onChange={(e) => setReferralCode(e.target.value)} className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400" /><p className="text-xs text-gray-400 mt-1">No referral code? No problem — leave it blank and continue!</p></div>
 
                   <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Account Summary</p>
