@@ -14,6 +14,7 @@ import {
   Settings,
   HelpCircle,
   LogIn,
+  LogOut,
   UserPlus,
   ChevronDown,
   LayoutDashboard,
@@ -23,6 +24,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { phases } from '@/lib/assets'
+import { useAuth } from '@/lib/auth-context'
 
 const navLinks = [
   { href: '/markets', label: 'Markets', icon: TrendingUp },
@@ -40,12 +42,18 @@ const moreLinks = [
 
 export function Navbar() {
   const pathname = usePathname()
+  const { user, profile, signOut } = useAuth()
   const [isMobileOpen, setIsMobileOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [showMore, setShowMore] = useState(false)
   const [showPhases, setShowPhases] = useState(false)
   const phasesRef = useRef<HTMLDivElement>(null)
   const moreRef = useRef<HTMLDivElement>(null)
+
+  const handleSignOut = async () => {
+    await signOut()
+    setIsMobileOpen(false)
+  }
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10)
@@ -239,19 +247,34 @@ export function Navbar() {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
-            <Link
-              href="/login"
-              className="hidden sm:flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition px-3 py-2"
-            >
-              <LogIn className="w-4 h-4" />
-              Log In
-            </Link>
-            <Link
-              href="/signup"
-              className="bg-[#00A88A] hover:bg-[#008F74] text-white font-semibold text-sm px-4 py-2 rounded-lg transition-all hover:shadow-lg hover:shadow-[#00A88A]/20"
-            >
-              Start Trading
-            </Link>
+            {user ? (
+              <>
+                <span className="hidden sm:inline text-sm text-gray-600">{profile?.full_name || user.email}</span>
+                <button
+                  onClick={handleSignOut}
+                  className="hidden sm:flex items-center gap-1.5 text-sm text-gray-600 hover:text-[#E63950] transition px-3 py-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="hidden sm:flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition px-3 py-2"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Log In
+                </Link>
+                <Link
+                  href="/signup"
+                  className="bg-[#00A88A] hover:bg-[#008F74] text-white font-semibold text-sm px-4 py-2 rounded-lg transition-all hover:shadow-lg hover:shadow-[#00A88A]/20"
+                >
+                  Start Trading
+                </Link>
+              </>
+            )}
             <button
               onClick={() => setIsMobileOpen(!isMobileOpen)}
               className="lg:hidden p-2 text-gray-600 hover:text-gray-900 transition"

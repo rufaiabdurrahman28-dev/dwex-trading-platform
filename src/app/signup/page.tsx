@@ -3,20 +3,24 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, ChevronLeft, ChevronRight, Check } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, User, Phone, MapPin, ChevronLeft, ChevronRight, Check, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/lib/auth-context'
 
 const countries = ['Nigeria','Ghana','Kenya','South Africa','Uganda','Tanzania','United States','United Kingdom','Canada','Germany','France','Australia','India','China','Japan','Brazil','Mexico','Egypt','Morocco','Cameroon','Senegal','Rwanda','Ethiopia','Democratic Republic of Congo','Angola','Mozambique','Zimbabwe','Botswana','Namibia','Zambia','Malawi','Tunisia','Algeria','Libya','Sudan','Somalia','Ivory Coast','Burkina Faso','Benin','Togo','Sierra Leone','Liberia','Mali','Niger','Chad','Guinea','Mauritania','Cape Verde','Gambia','Comoros']
 
 const steps = [{ number: 1, label: 'Account' }, { number: 2, label: 'Profile' }, { number: 3, label: 'Complete' }]
 
 export default function SignupPage() {
+  const router = useRouter()
+  const { signUp } = useAuth()
   const [currentStep, setCurrentStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
@@ -29,9 +33,85 @@ export default function SignupPage() {
   const [country, setCountry] = useState('')
   const [referralCode, setReferralCode] = useState('')
   const [agreeTerms, setAgreeTerms] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
 
-  const nextStep = () => setCurrentStep(Math.min(currentStep + 1, 3))
-  const prevStep = () => setCurrentStep(Math.max(currentStep - 1, 1))
+  const validateStep1 = () => {
+    if (!email.trim()) { setError('Please enter your email address'); return false }
+    if (!email.includes('@')) { setError('Please enter a valid email address'); return false }
+    if (password.length < 8) { setError('Password must be at least 8 characters'); return false }
+    if (password !== confirmPassword) { setError('Passwords do not match'); return false }
+    setError('')
+    return true
+  }
+
+  const validateStep2 = () => {
+    if (!firstName.trim()) { setError('Please enter your first name'); return false }
+    if (!lastName.trim()) { setError('Please enter your last name'); return false }
+    if (!country) { setError('Please select your country'); return false }
+    setError('')
+    return true
+  }
+
+  const nextStep = () => {
+    if (currentStep === 1 && !validateStep1()) return
+    if (currentStep === 2 && !validateStep2()) return
+    setError('')
+    setCurrentStep(Math.min(currentStep + 1, 3))
+  }
+  const prevStep = () => { setError(''); setCurrentStep(Math.max(currentStep - 1, 1)) }
+
+  const handleSignup = async () => {
+    if (!agreeTerms) { setError('Please agree to the Terms of Service'); return }
+    setError('')
+    setLoading(true)
+
+    try {
+      const { error: signUpError } = await signUp({
+        email,
+        password,
+        firstName,
+        lastName,
+        phone,
+        country,
+        referralCode: referralCode || undefined,
+      })
+
+      if (signUpError) {
+        setError(signUpError)
+        return
+      }
+
+      setSuccess(true)
+      // Redirect to wallet page after short delay
+      setTimeout(() => {
+        router.push('/wallet')
+      }, 2000)
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Success state
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center max-w-md">
+          <div className="w-20 h-20 rounded-full bg-[#00A88A]/10 flex items-center justify-center mx-auto mb-6">
+            <Check className="w-10 h-10 text-[#00A88A]" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Account Created!</h1>
+          <p className="text-gray-500 mb-6">Welcome to DWEX! Your trading account is ready. You can now deposit funds and start trading.</p>
+          <Button onClick={() => router.push('/wallet')} className="bg-[#00A88A] hover:bg-[#008F74] text-white font-bold py-6 px-8 rounded-xl">
+            Go to Wallet & Deposit
+          </Button>
+        </motion.div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
@@ -62,6 +142,12 @@ export default function SignupPage() {
             </div>
           ))}
         </div>
+
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-[#E63950]/10 border border-[#E63950]/20 text-[#E63950] text-sm text-center">
+            {error}
+          </div>
+        )}
 
         <Card className="bg-white border-gray-200 rounded-2xl overflow-hidden shadow-lg">
           <CardContent className="p-6 sm:p-8">
@@ -97,14 +183,24 @@ export default function SignupPage() {
               {currentStep === 3 && (
                 <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }} className="space-y-5">
                   <h2 className="text-lg font-bold text-gray-900">Almost There!</h2>
-                  <div><label className="text-sm text-gray-600 mb-1.5 block">Referral Code (Optional)</label><Input placeholder="Enter referral code" value={referralCode} onChange={(e) => setReferralCode(e.target.value)} className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400" /></div>
+                  <div><label className="text-sm text-gray-600 mb-1.5 block">Referral Code <span className="text-gray-400">(Optional)</span></label><Input placeholder="Enter referral code if you have one" value={referralCode} onChange={(e) => setReferralCode(e.target.value)} className="bg-white border-gray-200 text-gray-900 placeholder:text-gray-400" /><p className="text-xs text-gray-400 mt-1">No referral code? No problem — leave it blank!</p></div>
+
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Account Summary</p>
+                    <div className="flex justify-between text-sm"><span className="text-gray-500">Email</span><span className="font-medium text-gray-900 truncate ml-2">{email}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-gray-500">Name</span><span className="font-medium text-gray-900">{firstName} {lastName}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-gray-500">Country</span><span className="font-medium text-gray-900">{country}</span></div>
+                  </div>
+
                   <div className="flex items-start gap-2">
                     <Checkbox id="terms" checked={agreeTerms} onCheckedChange={(checked) => setAgreeTerms(checked as boolean)} className="mt-0.5 border-gray-300 data-[state=checked]:bg-[#00A88A] data-[state=checked]:border-[#00A88A]" />
                     <label htmlFor="terms" className="text-sm text-gray-600 leading-relaxed cursor-pointer">I agree to the <Link href="#" className="text-[#00A88A] hover:underline">Terms of Service</Link> and <Link href="#" className="text-[#00A88A] hover:underline">Privacy Policy</Link></label>
                   </div>
                   <div className="flex gap-3">
                     <Button onClick={prevStep} variant="outline" className="flex-1 border-gray-200 text-gray-700 hover:bg-gray-50 py-6 rounded-xl"><ChevronLeft className="w-4 h-4 mr-1" /> Back</Button>
-                    <Button className="flex-1 bg-[#00A88A] hover:bg-[#008F74] text-white font-bold py-6 rounded-xl" disabled={!agreeTerms}>Create Account</Button>
+                    <Button onClick={handleSignup} disabled={!agreeTerms || loading} className="flex-1 bg-[#00A88A] hover:bg-[#008F74] text-white font-bold py-6 rounded-xl disabled:opacity-50">
+                      {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Creating...</> : 'Create Account'}
+                    </Button>
                   </div>
                 </motion.div>
               )}

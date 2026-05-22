@@ -1,36 +1,47 @@
-export type Role = 'parent' | 'student' | 'teacher' | 'manager'
-export type Section = 'nursery' | 'primary' | 'jss' | 'sss'
-export type AdmissionStatus = 'pending' | 'reviewed' | 'accepted' | 'rejected'
-export type FileStatus = 'pending' | 'approved' | 'not_approved'
+// DWEX Trading Platform — Types
+
+export type Role = 'admin' | 'trader' | 'user'
+export type KYCStatus = 'pending' | 'submitted' | 'verified' | 'rejected'
 
 export interface Profile {
   id: string
   email: string
   full_name: string
   role: Role
-  section: Section
+  phone?: string
+  country?: string
+  kyc_status: KYCStatus
+  is_active: boolean
   created_at: string
 }
 
+export interface WalletData {
+  id: string
+  userId: string
+  phase: string
+  currency: string
+  balance: number
+  locked: number
+  createdAt: string
+}
+
 export interface PortalAccess {
-  management: boolean
-  school: boolean
-  teacher: boolean
-  student: boolean
-  helpdesk: boolean
+  trading: boolean
+  wallet: boolean
+  portfolio: boolean
+  admin: boolean
+  settings: boolean
 }
 
 export function getPortalAccess(role: Role): PortalAccess {
   switch (role) {
-    case 'manager':
-      return { management: true, school: true, teacher: true, student: true, helpdesk: true }
-    case 'teacher':
-      return { management: false, school: true, teacher: true, student: false, helpdesk: true }
-    case 'student':
-      return { management: false, school: false, teacher: false, student: true, helpdesk: true }
-    case 'parent':
-      return { management: false, school: false, teacher: false, student: true, helpdesk: true }
+    case 'admin':
+      return { trading: true, wallet: true, portfolio: true, admin: true, settings: true }
+    case 'trader':
+      return { trading: true, wallet: true, portfolio: true, admin: false, settings: true }
+    case 'user':
+      return { trading: true, wallet: true, portfolio: true, admin: false, settings: false }
     default:
-      return { management: false, school: false, teacher: false, student: false, helpdesk: false }
+      return { trading: true, wallet: true, portfolio: true, admin: false, settings: false }
   }
 }

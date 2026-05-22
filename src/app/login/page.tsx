@@ -3,18 +3,49 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, Mail, Lock, Chrome, Apple } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent } from '@/components/ui/card'
+import { useAuth } from '@/lib/auth-context'
 
 export default function LoginPage() {
+  const router = useRouter()
+  const { signIn } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [remember, setRemember] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+
+    if (!email.trim()) { setError('Please enter your email address'); return }
+    if (!password) { setError('Please enter your password'); return }
+
+    setLoading(true)
+    try {
+      const { error: signInError } = await signIn(email, password)
+
+      if (signInError) {
+        setError(signInError)
+        return
+      }
+
+      // Login successful — redirect to wallet
+      router.push('/wallet')
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
@@ -34,9 +65,15 @@ export default function LoginPage() {
           <p className="text-gray-500 text-sm mt-3">Welcome back. Log in to your account.</p>
         </div>
 
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-[#E63950]/10 border border-[#E63950]/20 text-[#E63950] text-sm text-center">
+            {error}
+          </div>
+        )}
+
         <Card className="bg-white border-gray-200 rounded-2xl shadow-lg">
           <CardContent className="p-6 sm:p-8">
-            <form onSubmit={(e) => e.preventDefault()} className="space-y-5">
+            <form onSubmit={handleLogin} className="space-y-5">
               <div>
                 <label className="text-sm text-gray-600 mb-1.5 block">Email Address</label>
                 <div className="relative">
@@ -64,7 +101,9 @@ export default function LoginPage() {
                 <Link href="#" className="text-sm text-[#00A88A] hover:text-[#008F74] transition">Forgot Password?</Link>
               </div>
 
-              <Button type="submit" className="w-full bg-[#00A88A] hover:bg-[#008F74] text-white font-bold py-6 rounded-xl text-base">Log In</Button>
+              <Button type="submit" disabled={loading} className="w-full bg-[#00A88A] hover:bg-[#008F74] text-white font-bold py-6 rounded-xl text-base disabled:opacity-50">
+                {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Logging in...</> : 'Log In'}
+              </Button>
             </form>
 
             <div className="relative my-6">
@@ -73,8 +112,8 @@ export default function LoginPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" className="border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-gray-900 py-5"><Chrome className="w-4 h-4 mr-2" />Google</Button>
-              <Button variant="outline" className="border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-gray-900 py-5"><Apple className="w-4 h-4 mr-2" />Apple</Button>
+              <Button type="button" variant="outline" className="border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-gray-900 py-5">Google</Button>
+              <Button type="button" variant="outline" className="border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-gray-900 py-5">Apple</Button>
             </div>
           </CardContent>
         </Card>
