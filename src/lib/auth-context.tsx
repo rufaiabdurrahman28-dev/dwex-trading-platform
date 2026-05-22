@@ -69,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    // If Supabase is not configured, just mark loading as done
     if (!isSupabaseConfigured) {
       setLoading(false)
       return
@@ -76,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     let subscription: { unsubscribe: () => void } | null = null
 
+    // Get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user)
@@ -90,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
     })
 
+    // Listen for auth changes
     try {
       const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
         if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
