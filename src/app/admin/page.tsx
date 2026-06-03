@@ -278,31 +278,65 @@ export default function AdminPage() {
           </Card>
         </motion.div>
 
-        {/* Security Status Panel */}
+        {/* Defense in Depth — Security Layers */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="mt-8">
-          <h2 className="text-lg font-bold mb-4 text-gray-900">Security Status</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="bg-white border-gray-200 shadow-sm"><CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2"><Shield className="w-4 h-4 text-[#00A88A]" /><span className="text-xs text-gray-400">Admin Auth</span></div>
-              <p className="text-sm font-semibold text-[#00A88A]">Protected</p>
-              <p className="text-xs text-gray-400">Role-based access</p>
-            </CardContent></Card>
-            <Card className="bg-white border-gray-200 shadow-sm"><CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2"><Lock className="w-4 h-4 text-[#00A88A]" /><span className="text-xs text-gray-400">Session Security</span></div>
+          <div className="flex items-center gap-2 mb-4">
+            <Shield className="w-5 h-5 text-[#00A88A]" />
+            <h2 className="text-lg font-bold text-gray-900">Defense in Depth</h2>
+            <Badge className="bg-[#00A88A]/10 text-[#00A88A] border-0 text-[10px]">5 Layers Active</Badge>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+            <Card className="bg-[#00A88A]/5 border-[#00A88A]/20 shadow-sm"><CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2"><div className="w-6 h-6 rounded-full bg-[#00A88A] text-white text-xs flex items-center justify-center font-bold">0</div><span className="text-xs font-semibold text-gray-900">Request Filter</span></div>
               <p className="text-sm font-semibold text-[#00A88A]">Active</p>
-              <p className="text-xs text-gray-400">72hr expiry</p>
+              <p className="text-[10px] text-gray-400">Blocks bots, SQLi, XSS, scanners before they reach auth</p>
             </CardContent></Card>
-            <Card className="bg-white border-gray-200 shadow-sm"><CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2"><CheckCircle2 className="w-4 h-4 text-[#E5940A]" /><span className="text-xs text-gray-400">Rate Limiting</span></div>
-              <p className="text-sm font-semibold text-[#E5940A]">Basic</p>
-              <p className="text-xs text-gray-400">Supabase built-in</p>
+            <Card className="bg-[#00A88A]/5 border-[#00A88A]/20 shadow-sm"><CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2"><div className="w-6 h-6 rounded-full bg-[#00A88A] text-white text-xs flex items-center justify-center font-bold">1</div><span className="text-xs font-semibold text-gray-900">Auth Gate</span></div>
+              <p className="text-sm font-semibold text-[#00A88A]">Active</p>
+              <p className="text-[10px] text-gray-400">Session required via Supabase Auth + JWT validation</p>
             </CardContent></Card>
-            <Card className="bg-white border-gray-200 shadow-sm"><CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2"><AlertCircle className="w-4 h-4 text-[#E63950]" /><span className="text-xs text-gray-400">2FA</span></div>
-              <p className="text-sm font-semibold text-[#E63950]">Not Enabled</p>
-              <p className="text-xs text-gray-400">Requires setup</p>
+            <Card className="bg-[#00A88A]/5 border-[#00A88A]/20 shadow-sm"><CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2"><div className="w-6 h-6 rounded-full bg-[#00A88A] text-white text-xs flex items-center justify-center font-bold">2</div><span className="text-xs font-semibold text-gray-900">Role Check</span></div>
+              <p className="text-sm font-semibold text-[#00A88A]">Active</p>
+              <p className="text-[10px] text-gray-400">Admin role verified in middleware, client, AND API</p>
+            </CardContent></Card>
+            <Card className="bg-[#00A88A]/5 border-[#00A88A]/20 shadow-sm"><CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2"><div className="w-6 h-6 rounded-full bg-[#00A88A] text-white text-xs flex items-center justify-center font-bold">3</div><span className="text-xs font-semibold text-gray-900">Security Headers</span></div>
+              <p className="text-sm font-semibold text-[#00A88A]">Active</p>
+              <p className="text-[10px] text-gray-400">CSP, X-Frame-Options, nosniff, Referrer-Policy</p>
+            </CardContent></Card>
+            <Card className="bg-[#E5940A]/5 border-[#E5940A]/20 shadow-sm"><CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2"><div className="w-6 h-6 rounded-full bg-[#E5940A] text-white text-xs flex items-center justify-center font-bold">4</div><span className="text-xs font-semibold text-gray-900">Rate Limiting</span></div>
+              <p className="text-sm font-semibold text-[#E5940A]">Active</p>
+              <p className="text-[10px] text-gray-400">5 login/15min, 3 signup/hr, auto-block after limit</p>
             </CardContent></Card>
           </div>
+
+          {/* Attack scenario table */}
+          <Card className="mt-4 bg-white border-gray-200 shadow-sm overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+              <h3 className="text-xs font-semibold text-gray-700">What happens if an attacker tries...</h3>
+            </div>
+            <div className="overflow-x-auto"><table className="w-full text-xs">
+              <thead><tr className="border-b border-gray-200">
+                <th className="text-left py-2.5 px-4 text-gray-400 font-medium">Attack</th>
+                <th className="text-left py-2.5 px-4 text-gray-400 font-medium">Layer 0</th>
+                <th className="text-left py-2.5 px-4 text-gray-400 font-medium">Layer 1</th>
+                <th className="text-left py-2.5 px-4 text-gray-400 font-medium">Layer 2</th>
+                <th className="text-left py-2.5 px-4 text-gray-400 font-medium">Layer 3</th>
+                <th className="text-center py-2.5 px-4 text-gray-400 font-medium">Result</th>
+              </tr></thead>
+              <tbody>
+                <tr className="border-b border-gray-100"><td className="py-2.5 px-4 font-medium text-gray-900">SQLi in URL</td><td className="py-2.5 px-4"><Badge className="bg-[#E63950]/10 text-[#E63950] border-0 text-[9px]">BLOCKED</Badge></td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4 text-center"><Badge className="bg-[#00A88A]/10 text-[#00A88A] border-0 text-[9px]">400 Bad Request</Badge></td></tr>
+                <tr className="border-b border-gray-100"><td className="py-2.5 px-4 font-medium text-gray-900">Visit /admin no auth</td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4"><Badge className="bg-[#E63950]/10 text-[#E63950] border-0 text-[9px]">BLOCKED</Badge></td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4 text-center"><Badge className="bg-[#00A88A]/10 text-[#00A88A] border-0 text-[9px]">→ /login</Badge></td></tr>
+                <tr className="border-b border-gray-100"><td className="py-2.5 px-4 font-medium text-gray-900">Trader visits /admin</td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4 text-green-400">pass</td><td className="py-2.5 px-4"><Badge className="bg-[#E63950]/10 text-[#E63950] border-0 text-[9px]">BLOCKED</Badge></td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4 text-center"><Badge className="bg-[#00A88A]/10 text-[#00A88A] border-0 text-[9px]">→ /wallet</Badge></td></tr>
+                <tr className="border-b border-gray-100"><td className="py-2.5 px-4 font-medium text-gray-900">Brute force login</td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4 text-green-400">pass</td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4 text-green-400">pass</td><td className="py-2.5 px-4 text-center"><Badge className="bg-[#E5940A]/10 text-[#E5940A] border-0 text-[9px]">429 Rate Limited</Badge></td></tr>
+                <tr className="border-b border-gray-100"><td className="py-2.5 px-4 font-medium text-gray-900">Bot scanner (sqlmap)</td><td className="py-2.5 px-4"><Badge className="bg-[#E63950]/10 text-[#E63950] border-0 text-[9px]">BLOCKED</Badge></td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4 text-center"><Badge className="bg-[#00A88A]/10 text-[#00A88A] border-0 text-[9px]">403 Forbidden</Badge></td></tr>
+                <tr><td className="py-2.5 px-4 font-medium text-gray-900">XSS in URL params</td><td className="py-2.5 px-4"><Badge className="bg-[#E63950]/10 text-[#E63950] border-0 text-[9px]">BLOCKED</Badge></td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4 text-gray-300">—</td><td className="py-2.5 px-4 text-center"><Badge className="bg-[#00A88A]/10 text-[#00A88A] border-0 text-[9px]">400 Bad Request</Badge></td></tr>
+              </tbody>
+            </table></div>
+          </Card>
         </motion.div>
       </div>
     </div>
