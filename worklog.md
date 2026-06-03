@@ -29,3 +29,29 @@ Stage Summary:
 - Email confirmation flow handled with clear UX
 - Route protection via middleware
 - Deployed to https://my-project-eight-wheat.vercel.app
+
+---
+Task ID: 2
+Agent: Main Agent
+Task: Security hardening - fix admin route protection, add rate limiting, security headers
+
+Work Log:
+- Identified critical vulnerability: middleware only checked session existence, not user role, for admin routes
+- Any authenticated user could access /admin regardless of role
+- Fixed middleware.ts to verify user.role === 'admin' from session user_metadata
+- Added client-side admin guard on admin page - redirects non-admins to /wallet
+- Added loading/access-denied states for unauthorized access attempts
+- Created /src/lib/api/rate-limit.ts - in-memory rate limiting utility
+- Applied rate limiting to login (5 attempts/15min) and signup (3 attempts/hour) endpoints
+- Added security headers to all responses: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, X-XSS-Protection, Permissions-Policy
+- Connected admin dashboard to real Supabase data via /api/admin/stats and /api/admin/users
+- Added Security Status panel to admin dashboard showing current security posture
+- Enhanced input validation on auth endpoints (email format, password length limits)
+- Build succeeded, pushed to GitHub, auto-deploying to Vercel
+
+Stage Summary:
+- Admin route protection now checks user ROLE (not just session) — critical fix
+- Rate limiting protects against brute force on auth endpoints
+- Security headers prevent clickjacking, MIME sniffing, XSS
+- Admin dashboard shows real data from Supabase
+- Deployed to https://my-project-eight-wheat.vercel.app
