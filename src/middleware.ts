@@ -54,11 +54,25 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl)
   }
 
-  // Redirect unauthenticated users away from admin routes
-  if (!session && isAdminRoute) {
-    const redirectUrl = req.nextUrl.clone()
-    redirectUrl.pathname = '/login'
-    return NextResponse.redirect(redirectUrl)
+  // CRITICAL SECURITY: Admin route protection — check role, not just session
+  if (isAdminRoute) {
+    if (!session) {
+      // Not logged in at all → redirect to login
+      const redirectUrl = req.nextUrl.clone()
+      redirectUrl.pathname = '/login'
+      redirectUrl.searchParams.set('redirectTo', pathname)
+      return NextResponse.redirect(redirectUrl)
+    }
+
+    // Check if user has admin role from user metadata
+    const userRole = session.user?.user_metadata?.role
+    if (userRole !== 'admin') {
+      // Logged in but NOT admin → redirect to wallet with unauthorized message
+      const redirectUrl = req.nextUrl.clone()
+      redirectUrl.pathname = '/wallet'
+      redirectUrl.searchParams.set('error', 'unauthorized_access')
+      return NextResponse.redirect(redirectUrl)
+    }
   }
 
   // Redirect authenticated users away from login/signup to wallet
@@ -67,6 +81,19 @@ export async function middleware(req: NextRequest) {
     redirectUrl.pathname = '/wallet'
     return NextResponse.redirect(redirectUrl)
   }
+
+  // Add security headers to all responses
+  const securityHeaders = {
+    'X-Frame-Options': 'DENY',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'X-XSS-Protection': '1; mode=block',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+  }
+
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    res.headers.set(key, value)
+  })
 
   return res
 }

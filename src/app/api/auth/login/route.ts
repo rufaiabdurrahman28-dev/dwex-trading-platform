@@ -1,9 +1,26 @@
 import { db } from '@/lib/db'
 import { hashPassword, verifyPassword, createSession, getAuthUser } from '@/lib/api/auth'
 import { success, error, unauthorized } from '@/lib/api/response'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/api/rate-limit'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
+  // RATE LIMITING: Protect against brute force attacks
+  const rateCheck = applyRateLimit(request, RATE_LIMITS.login)
+  if (rateCheck.limited) {
+    const retryMinutes = Math.ceil(rateCheck.retryAfterMs / 60000)
+    return NextResponse.json(
+      { error: `Too many login attempts. Please try again in ${retryMinutes} minute${retryMinutes > 1 ? 's' : ''}.` },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(Math.ceil(rateCheck.retryAfterMs / 1000)),
+          'X-RateLimit-Remaining': '0',
+        },
+      }
+    )
+  }
+
   try {
     const body = await request.json()
     const { email, password } = body
@@ -13,12 +30,24 @@ export async function POST(request: Request) {
       return error('Email and password are required')
     }
 
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return error('Please enter a valid email address')
+    }
+
+    // Password length check (prevent excessively long inputs)
+    if (password.length > 128) {
+      return error('Invalid credentials')
+    }
+
     // Find user by email
     const user = await db.user.findUnique({
       where: { email: email.toLowerCase() },
     })
 
     if (!user) {
+      // SECURITY: Don't reveal whether email exists — same error message
       return error('Invalid email or password', 401)
     }
 

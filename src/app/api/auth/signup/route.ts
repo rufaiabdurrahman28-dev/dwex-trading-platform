@@ -1,11 +1,28 @@
 import { db } from '@/lib/db'
 import { hashPassword, verifyPassword, createSession, getAuthUser } from '@/lib/api/auth'
 import { success, error, unauthorized } from '@/lib/api/response'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/api/rate-limit'
 import { NextResponse } from 'next/server'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function POST(request: Request) {
+  // RATE LIMITING: Prevent automated account creation
+  const rateCheck = applyRateLimit(request, RATE_LIMITS.signup)
+  if (rateCheck.limited) {
+    const retryMinutes = Math.ceil(rateCheck.retryAfterMs / 60000)
+    return NextResponse.json(
+      { error: `Too many signup attempts. Please try again in ${retryMinutes} minute${retryMinutes > 1 ? 's' : ''}.` },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(Math.ceil(rateCheck.retryAfterMs / 1000)),
+          'X-RateLimit-Remaining': '0',
+        },
+      }
+    )
+  }
+
   try {
     const body = await request.json()
     const { fullName, email, phone, password } = body
