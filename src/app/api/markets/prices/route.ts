@@ -1,4 +1,4 @@
-import { allAssets, categories } from '@/lib/assets'
+import { allAssets, assetCategories as categories } from '@/lib/assets'
 import { success, error } from '@/lib/api/response'
 
 export async function GET(request: Request) {

@@ -1,4 +1,4 @@
-import { categories } from '@/lib/assets'
+import { assetCategories as categories } from '@/lib/assets'
 import { allAssets } from '@/lib/assets'
 import { success, error } from '@/lib/api/response'
 
